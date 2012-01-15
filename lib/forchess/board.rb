@@ -46,7 +46,6 @@ module Forchess
     attach_function :fc_board_get_piece,
       [:pointer, :pointer, :pointer, :int, :int], :int
     # parameter is of type [Integer, Integer]
-    # returns type {:player => Player, :piece => Piece}
     def get_piece (coords)
       player = FFI::MemoryPointer.new(:int, 1)
       piece = FFI::MemoryPointer.new(:int, 1)
@@ -61,10 +60,16 @@ module Forchess
     end
 
     attach_function :fc_board_get_moves, [:pointer, :pointer, Player], :void
-    def moves (player)
+    def get_moves (player)
       moves = MoveList.new
       Forchess.fc_board_get_moves(@board, moves.to_ptr, player)
       moves
+    end
+
+    attach_function :fc_board_make_move, [:pointer, :pointer], :int
+    def move (move_obj)
+      # TODO check return condition for promotion requirement
+      Forchess.fc_board_make_move(@board, move_obj.to_ptr)
     end
   end
 end

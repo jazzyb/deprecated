@@ -6,11 +6,15 @@ puts b.setup(ARGV[0])
 
 b.set_piece(:second, :knight, [2, 2])
 puts b.get_piece([2, 2])
-#b.remove_piece([2, 2])
+puts '-' * 30
+b.remove_piece([2, 2])
 
-b.material_value[:knight] = 50
-p b.material_value[:knight]
+b.get_moves(:first).each do |move|
+  puts "[#{move.player} #{move.piece}] takes [#{move.opp_player} #{move.opp_piece}]"
+end
 
-b.moves(:first).each do |move|
+b.move(b.get_moves(:first)[3])
+puts '-' * 30
+b.get_moves(:second).each do |move|
   puts "[#{move.player} #{move.piece}] takes [#{move.opp_player} #{move.opp_piece}]"
 end
