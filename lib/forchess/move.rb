@@ -1,7 +1,7 @@
 require 'ffi'
 
 require 'forchess/common'
-require 'forchess/move_struct'
+require 'forchess/move/struct'
 require 'forchess/piece'
 require 'forchess/player'
 

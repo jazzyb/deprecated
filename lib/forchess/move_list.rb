@@ -2,7 +2,7 @@ require 'ffi'
 
 require 'forchess/common'
 require 'forchess/move'
-require 'forchess/move_list_struct'
+require 'forchess/move_list/struct'
 
 module Forchess
   class MoveList
