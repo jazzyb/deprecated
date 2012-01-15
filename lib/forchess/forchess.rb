@@ -1,0 +1,5 @@
+require 'forchess/player'
+require 'forchess/piece'
+require 'forchess/move'
+require 'forchess/move_list'
+require 'forchess/board'
