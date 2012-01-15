@@ -1,8 +1,8 @@
 require 'ffi'
 
+require 'forchess/board/material_value'
 require 'forchess/board/struct'
 require 'forchess/common'
-require 'forchess/material_value'
 require 'forchess/move'
 require 'forchess/move_list'
 require 'forchess/piece'
