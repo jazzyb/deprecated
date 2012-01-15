@@ -14,6 +14,7 @@ module Forchess
     class ManagedMoveListStruct < FFI::ManagedStruct
       include MoveListLayout
 
+      Forchess.attach_function :fc_mlist_free, [:pointer], :void
       def self.release (ptr)
         Forchess.fc_mlist_free(ptr)
         Forchess.free_object(ptr)

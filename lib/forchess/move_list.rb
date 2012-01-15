@@ -8,6 +8,7 @@ module Forchess
   class MoveList
     include Forchess::Common
 
+    attach_function :fc_mlist_init, [:pointer], :int
     def initialize (ptr=nil)
       if ptr.nil?
         @move_list = create_struct_object(ManagedMoveListStruct)
@@ -17,10 +18,12 @@ module Forchess
       end
     end
 
+    attach_function :fc_mlist_length, [:pointer], :int
     def length
       Forchess.fc_mlist_length(@move_list)
     end
 
+    attach_function :fc_mlist_get, [:pointer, :int], :pointer
     def [] (idx)
       return nil if idx >= self.length
       ref = FFI::MemoryPointer.new :pointer
@@ -41,11 +44,4 @@ module Forchess
       @move_list
     end
   end
-
-  # :pointer is an mlist
-  attach_function :fc_mlist_init, [:pointer], :int
-  attach_function :fc_mlist_free, [:pointer], :void
-  attach_function :fc_mlist_length, [:pointer], :int
-  # returns a pointer to a move
-  attach_function :fc_mlist_get, [:pointer, :int], :pointer
 end

@@ -33,6 +33,7 @@ module Forchess
       @move[:opp_piece]
     end
 
+    attach_function :fc_move_set_promotion, [:pointer, Piece], :void
     def promotion= (piece)
       Forchess.fc_move_set_promotion(@move, piece)
       promotion
@@ -54,8 +55,4 @@ module Forchess
       @move
     end
   end
-
-  # :pointer is a move
-  attach_function :fc_move_set_promotion, [:pointer, Piece], :void
-  attach_function :fc_move_copy, [:pointer, :pointer], :void
 end
