@@ -2,6 +2,12 @@ require 'ffi'
 
 module Forchess
   module Common
+    def self.included (base)
+      def base.attach_function (*args)
+        Forchess.attach_function(*args)
+      end
+    end
+
     def create_struct_object (struct_class, ptr=nil)
       if ptr.nil?
         ptr = FFI::MemoryPointer.new(struct_class, 1)
