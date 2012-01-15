@@ -17,6 +17,10 @@ module Forchess
       end
     end
 
+    def to_ptr
+      @move
+    end
+
     def player
       @move[:player]
     end
@@ -49,10 +53,6 @@ module Forchess
 
     def value
       @move[:value]
-    end
-
-    def to_ptr
-      @move
     end
   end
 end

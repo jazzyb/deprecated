@@ -18,6 +18,10 @@ module Forchess
       end
     end
 
+    def to_ptr
+      @move_list
+    end
+
     attach_function :fc_mlist_length, [:pointer], :int
     def length
       Forchess.fc_mlist_length(@move_list)
@@ -38,10 +42,6 @@ module Forchess
         yield self[idx]
         idx += 1
       end
-    end
-
-    def to_ptr
-      @move_list
     end
   end
 end
