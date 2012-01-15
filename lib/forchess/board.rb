@@ -1,5 +1,6 @@
 require 'ffi'
 
+require 'forchess/board/check_status'
 require 'forchess/board/material_value'
 require 'forchess/board/struct'
 require 'forchess/common'
@@ -70,6 +71,26 @@ module Forchess
     def move (move_obj)
       # TODO check return condition for promotion requirement
       Forchess.fc_board_make_move(@board, move_obj.to_ptr)
+    end
+
+    attach_function :fc_board_check_status, [:pointer, Player], :int
+    def check_status (player)
+      CheckStatus[Forchess.fc_board_check_status(@board, player)]
+    end
+
+    attach_function :fc_board_is_player_out, [:pointer, Player], :int
+    def player_out? (player)
+      Forchess.fc_board_is_player_out(@board, player) == 1
+    end
+
+    attach_function :fc_board_game_over, [:pointer], :int
+    def game_over?
+      Forchess.fc_board_game_over(@board) == 1
+    end
+
+    attach_function :fc_board_score_position, [:pointer, Player], :int
+    def score (player)
+      Forchess.fc_board_score_position(@board, player)
     end
   end
 end
