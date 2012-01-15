@@ -1,4 +1,5 @@
 require 'ffi'
+require 'forchess/common'
 require 'forchess/move'
 
 module Forchess
@@ -25,19 +26,14 @@ module Forchess
   end
 
   class MoveList
-    def initialize (ptr=nil, type=:managed_struct)
-      if ptr.nil?
-        ptr = FFI::MemoryPointer.new(MoveListStruct, 1)
-        # this useless cast gets around a bug in my version of FFI
-        ptr = FFI::Pointer.new ptr
-      end
+    include Forchess::Common
 
-      if type == :managed_struct
-        @move_list = ManagedMoveListStruct.new ptr
+    def initialize (ptr=nil)
+      if ptr.nil?
+        @move_list = create_struct_object(ManagedMoveListStruct)
         Forchess.fc_mlist_init(@move_list)
-        # TODO handle malloc failure
       else
-        @move_list = MoveListStruct.new ptr
+        @move_list = create_struct_object(MoveListStruct, ptr)
       end
     end
 
@@ -47,10 +43,10 @@ module Forchess
 
     def [] (idx)
       return nil if idx >= self.length
-      ret = FFI::MemoryPointer.new :pointer
-      ret = Forchess.fc_mlist_get(@move_list, idx)
+      ref = FFI::MemoryPointer.new :pointer
+      ref = Forchess.fc_mlist_get(@move_list, idx)
       # TODO handle error if ptr is nil
-      Move.new(ret, :reference) # reference tells ruby not to free the object
+      Move.new ref
     end
 
     def each

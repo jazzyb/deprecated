@@ -1,3 +1,4 @@
+require 'forchess/common'
 require 'forchess/player'
 require 'forchess/piece'
 require 'forchess/move'

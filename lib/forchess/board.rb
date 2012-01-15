@@ -1,4 +1,5 @@
 require 'ffi'
+require 'forchess/common'
 require 'forchess/player'
 require 'forchess/move'
 require 'forchess/move_list'
@@ -29,18 +30,14 @@ module Forchess
   end
 
   class Board
-    def initialize (ptr=nil, type=:managed_struct)
-      if ptr.nil?
-        ptr = FFI::MemoryPointer.new(ManagedBoardStruct, 1)
-        # this useless cast gets around a bug in my version of FFI
-        ptr = FFI::Pointer.new ptr
-      end
+    include Forchess::Common
 
-      if type == :managed_struct
-        @board = ManagedBoardStruct.new ptr
+    def initialize (ptr=nil)
+      if ptr.nil?
+        @board = create_struct_object(ManagedBoardStruct)
         Forchess.fc_board_init(@board)
       else
-        @board = BoardStruct.new ptr
+        @board = create_struct_object(BoardStruct, ptr)
       end
     end
 
@@ -56,6 +53,10 @@ module Forchess
       moves = MoveList.new
       Forchess.fc_board_get_moves(@board, moves.to_ptr, player)
       moves
+    end
+
+    def to_ptr
+      @board
     end
   end
 
