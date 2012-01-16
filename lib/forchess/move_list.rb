@@ -6,6 +6,7 @@ require 'forchess/move_list/struct'
 
 module Forchess
   class MoveList
+    include Enumerable
     include Forchess::Common
 
     attach_function :fc_mlist_init, [:pointer], :int
@@ -26,8 +27,10 @@ module Forchess
     def length
       Forchess.fc_mlist_length(@move_list)
     end
+    alias :size :length
 
     attach_function :fc_mlist_get, [:pointer, :int], :pointer
+    # TODO handle negative indices
     def [] (idx)
       return nil if idx >= self.length
       ref = FFI::MemoryPointer.new :pointer

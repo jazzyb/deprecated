@@ -21,6 +21,14 @@ module Forchess
       @move
     end
 
+    def <=> (other)
+      self.value <=> other.value
+    end
+
+    def == (other)
+      self.move == other.move
+    end
+
     def player
       @move[:player]
     end
@@ -47,8 +55,14 @@ module Forchess
       @move[:promote]
     end
 
+    # NOTE:  This is technically public, but it should only ever be called
+    # from Board#get_moves
+    def _set_move (coords)
+      @coords = coords
+    end
+
     def move
-      # TODO return [ [x1, y1], [x2, y2] ]
+      @coords or @move[:move]
     end
 
     def value
