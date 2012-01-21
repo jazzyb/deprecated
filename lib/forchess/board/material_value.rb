@@ -12,9 +12,11 @@ module Forchess
         @board = board
       end
 
-      attach_function :fc_board_set_material_value, [:pointer, Piece, :int], :void
+      attach_function :fc_board_set_material_value, [:pointer, Piece, :int],
+        :void
       def []= (piece, value)
         Forchess.fc_board_set_material_value(@board, piece, value)
+        value
       end
 
       attach_function :fc_board_get_material_value, [:pointer, Piece], :int

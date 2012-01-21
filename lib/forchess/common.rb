@@ -12,6 +12,7 @@ module Forchess
       if ptr.nil?
         ptr = FFI::MemoryPointer.new(struct_class, 1)
         # this useless cast gets around a bug in my version of FFI
+        # FIXME  Will this cause a memory leak?
         ptr = FFI::Pointer.new ptr
       end
       struct_class.new ptr

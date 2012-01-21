@@ -18,9 +18,7 @@ module Forchess
     def initialize (filename=nil)
       @board = create_struct_object(ManagedBoardStruct)
       Forchess.fc_board_init(@board)
-      if not filename.nil?
-        setup(filename)
-      end
+      setup(filename) unless filename.nil?
       @material_value = MaterialValue.new(@board)
     end
 
@@ -80,6 +78,14 @@ module Forchess
     attach_function :fc_board_check_status, [:pointer, Player], :int
     def check_status (player)
       CheckStatus[Forchess.fc_board_check_status(@board, player)]
+    end
+
+    def check? (player)
+      self.check_status == :check
+    end
+
+    def checkmate? (player)
+      self.check_status == :checkmate
     end
 
     attach_function :fc_board_is_player_out, [:pointer, Player], :int

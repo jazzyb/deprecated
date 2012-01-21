@@ -21,10 +21,6 @@ module Forchess
       @move
     end
 
-    def <=> (other)
-      self.value <=> other.value
-    end
-
     def == (other)
       self.move == other.move
     end

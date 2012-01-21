@@ -17,6 +17,7 @@ module Forchess
       else
         @move_list = create_struct_object(MoveListStruct, ptr)
       end
+      @length = nil
     end
 
     def to_ptr
@@ -25,13 +26,13 @@ module Forchess
 
     attach_function :fc_mlist_length, [:pointer], :int
     def length
-      Forchess.fc_mlist_length(@move_list)
+      @length ||= Forchess.fc_mlist_length(@move_list)
     end
     alias :size :length
 
     attach_function :fc_mlist_get, [:pointer, :int], :pointer
-    # TODO handle negative indices
     def [] (idx)
+      idx = self.length + idx if idx < 0 # handle negative indices
       return nil if idx >= self.length
       ref = FFI::MemoryPointer.new :pointer
       ref = Forchess.fc_mlist_get(@move_list, idx)
