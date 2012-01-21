@@ -10,7 +10,8 @@ module Forchess
     include Forchess::Common
 
     attach_function :fc_mlist_init, [:pointer], :int
-    def initialize (ptr=nil)
+    def initialize (board, ptr=nil)
+      @board = board
       if ptr.nil?
         @move_list = create_struct_object(ManagedMoveListStruct)
         Forchess.fc_mlist_init(@move_list)
@@ -37,7 +38,7 @@ module Forchess
       ref = FFI::MemoryPointer.new :pointer
       ref = Forchess.fc_mlist_get(@move_list, idx)
       # TODO handle error if ptr is nil
-      Move.new ref
+      Move.new(ref, @board.coords_from_move(ref))
     end
 
     def each

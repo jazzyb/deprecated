@@ -9,12 +9,13 @@ module Forchess
   class Move
     include Forchess::Common
 
-    def initialize (ptr=nil)
+    def initialize (ptr=nil, coords=nil)
       if ptr.nil?
         @move = create_struct_object(ManagedMoveStruct)
       else
         @move = create_struct_object(MoveStruct, ptr)
       end
+      @coords = coords
     end
 
     def to_ptr
@@ -49,12 +50,6 @@ module Forchess
 
     def promotion
       @move[:promote]
-    end
-
-    # NOTE:  This is technically public, but it should only ever be called
-    # from Board#get_moves
-    def _set_move (coords)
-      @coords = coords
     end
 
     def move

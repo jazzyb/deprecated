@@ -63,9 +63,8 @@ module Forchess
 
     attach_function :fc_board_get_moves, [:pointer, :pointer, Player], :void
     def get_moves (player)
-      moves = MoveList.new
+      moves = MoveList.new self
       Forchess.fc_board_get_moves(@board, moves.to_ptr, player)
-      _set_coords(moves)
       moves
     end
 
@@ -103,26 +102,26 @@ module Forchess
       Forchess.fc_board_score_position(@board, player)
     end
 
-    private
-
     # TODO ensure that this works with removes as well
-    def _set_coords (mlist)
-      mlist.each do |item|
-        bitfield = item.move
-        next if bitfield.kind_of? Enumerable # the coords have already been set
-        coords = _get_coords_from_bitfield bitfield
-        piece = self.get_piece coords[0]
-        if piece[:piece] == item.piece and piece[:player] == item.player
-          item._set_move coords
-        elsif piece[:piece] == item.opp_piece and
-              piece[:player] == item.opp_player
-          item._set_move coords.reverse
-        else
-          # TODO handle error
-          assert
-        end
+    def coords_from_move (move_ptr)
+      move = Move.new move_ptr
+      bitfield = move.move
+      return bitfield if bitfield.kind_of? Enumerable
+
+      coords = _get_coords_from_bitfield bitfield
+      piece = self.get_piece coords[0]
+      if piece[:piece] == move.piece and piece[:player] == move.player
+        return coords
+      elsif piece[:piece] == move.opp_piece and
+            piece[:player] == move.opp_player
+        return coords.reverse
+      else
+        # TODO handle error
+        assert
       end
     end
+
+    private
 
     def _get_coords_from_bitfield (bf)
       coords = []

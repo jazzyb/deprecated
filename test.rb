@@ -11,6 +11,7 @@ b.remove_piece([2, 2])
 
 b.get_moves(:first).each do |move|
   puts "[#{move.player} #{move.piece}] takes [#{move.opp_player} #{move.opp_piece}]"
+  puts "  (#{move.move[0][0]},#{move.move[0][1]}) -> (#{move.move[1][0]},#{move.move[1][1]})"
 end
 
 b.move(b.get_moves(:first)[3])
