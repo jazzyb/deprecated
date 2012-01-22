@@ -45,8 +45,9 @@ module Forchess
 
     attach_function :fc_board_make_move, [:pointer, :pointer], :int
     def move (move_obj)
-      # TODO check return condition for promotion requirement
-      Forchess.fc_board_make_move(@board, move_obj.to_ptr)
+      rc = Forchess.fc_board_make_move(@board, move_obj.to_ptr)
+      raise "move requires promotion to be set" if rc == 0
+      nil
     end
 
     # coords is of type [[x1, y1], [x2, y2]]

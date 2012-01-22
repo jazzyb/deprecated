@@ -10,11 +10,11 @@ class BoardTest < Test::Unit::TestCase
     _set_pieces
   end
 
-=begin TODO
   def test_moves
-    @board = Forchess::Board.new 'test/boards/board2.txt'
+    _get_moves
+    _create_move
+    _move_piece
   end
-=end
 
   private
 
@@ -69,5 +69,45 @@ class BoardTest < Test::Unit::TestCase
     @board[0][0] = {:player => :third, :piece => :rook}
     assert_equal :third, @board.get_piece([0, 0])[:player]
     assert_equal :rook, @board.get_piece([0, 0])[:piece]
+  end
+
+  def _get_moves
+    result_set = [ [[0,3],[0,4]],
+                   [[1,3],[1,4]],
+                   [[2,3],[2,4]],
+                   [[3,3],[3,4]],
+                   [[3,3],[4,3]],
+                   [[3,2],[4,2]],
+                   [[3,1],[4,1]],
+                   [[3,0],[4,0]],
+                   [[0,2],[1,4]],
+                   [[2,1],[4,0]],
+                   [[2,1],[4,2]],
+                   [[1,1],[2,2]] ]
+    @board = Forchess::Board.new 'test/boards/board2.txt'
+    list = @board.get_moves(0)
+    result_set.each do |result|
+      assert_not_nil(list.find result)
+    end
+  end
+
+  def _create_move
+    coords = [[0,3],[1,7]]
+    @move = @board.create_move coords
+    assert_equal :first, @move.player
+    assert_equal :pawn, @move.piece
+    assert_equal :second, @move.opp_player
+    assert_equal :rook, @move.opp_piece
+    assert_equal coords, @move.move
+  end
+
+  def _move_piece
+    assert_raise(RuntimeError) { @board.move @move }
+    @move.promotion = :queen
+    assert_nothing_raised(RuntimeError) { @board.move @move }
+    assert_equal :first, @board['b']['8'][:player]
+    assert_equal :queen, @board['b']['8'][:piece]
+    assert_equal :none, @board['a']['4'][:player]
+    assert_equal :none, @board['a']['4'][:piece]
   end
 end
