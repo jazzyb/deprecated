@@ -10,9 +10,11 @@ class BoardTest < Test::Unit::TestCase
     _set_pieces
   end
 
+=begin TODO
   def test_moves
     @board = Forchess::Board.new 'test/boards/board2.txt'
   end
+=end
 
   private
 
