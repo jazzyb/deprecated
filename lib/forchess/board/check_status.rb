@@ -13,11 +13,11 @@ module Forchess
     end
 
     def check? (player)
-      self.check_status == :check
+      self.check_status(player) == :check
     end
 
     def checkmate? (player)
-      self.check_status == :checkmate
+      self.check_status(player) == :checkmate
     end
   end
 end

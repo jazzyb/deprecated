@@ -16,6 +16,21 @@ class BoardTest < Test::Unit::TestCase
     _move_piece
   end
 
+  # stolen from test_forchess_checkmate in ext/libforchess/test/check_check.c
+  def test_check_status
+    @board = Forchess::Board.new 'test/boards/board2.txt'
+    assert_equal(:none, @board.check_status(:first))
+    assert_equal(:none, @board.check_status(:second))
+    assert_equal(:none, @board.check_status(:third))
+    assert_equal(:none, @board.check_status(:fourth))
+    @board = Forchess::Board.new 'test/boards/board3.txt'
+    assert(@board.checkmate? :first)
+    assert(@board.check? :second)
+    @board['d']['4'] = {:player => :first, :piece => :bishop}
+    assert(@board.check? :first)
+    assert(@board.checkmate? :second)
+  end
+
   private
 
   def _setup_board
