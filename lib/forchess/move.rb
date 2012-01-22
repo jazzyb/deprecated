@@ -7,6 +7,7 @@ require 'forchess/player'
 
 module Forchess
   class Move
+    include Comparable
     include Forchess::Common
 
     def initialize (ptr=nil, coords=nil)
@@ -20,6 +21,14 @@ module Forchess
 
     def to_ptr
       @move
+    end
+
+    def to_s
+      "#{player} #{piece} #{opp_player} #{opp_piece} #{move} #{value}"
+    end
+
+    def <=> (other)
+      self.value <=> other.value
     end
 
     def == (other)
@@ -58,6 +67,10 @@ module Forchess
 
     def value
       @move[:value]
+    end
+
+    def value= (new_val)
+      @move[:value] = new_val
     end
   end
 end

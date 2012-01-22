@@ -1,7 +1,9 @@
 require 'ffi'
 
+require 'forchess/assertion'
 require 'forchess/board/check_status'
 require 'forchess/board/material_value'
+require 'forchess/board/placement'
 require 'forchess/board/struct'
 require 'forchess/common'
 require 'forchess/move'
@@ -29,36 +31,9 @@ module Forchess
     attach_function :fc_board_setup, [:pointer, :string, :pointer], :int
     def setup (filename)
       player = FFI::MemoryPointer.new(:int, 1)
-      Forchess.fc_board_setup(@board, filename, player)
-      # TODO check for error
+      rc = Forchess.fc_board_setup(@board, filename, player)
+      raise "invalid forchess format for file '#{filename}'" if rc == 0
       Player[player.get_int(0)]
-    end
-
-    attach_function :fc_board_set_piece, [:pointer, Player, Piece, :int, :int],
-      :int
-    # parameters are of types Player, Piece, [Integer, Integer], respectively
-    def set_piece (player, piece, coords)
-      # TODO check return code for error
-      # NOTE: we call coords.reverse because libforchess takes these values as
-      # row/col whereas this wrapper assumes they are x/y coords, see also
-      # get_piece and remove_piece
-      Forchess.fc_board_set_piece(@board, player, piece, *(coords.reverse))
-    end
-
-    attach_function :fc_board_get_piece,
-      [:pointer, :pointer, :pointer, :int, :int], :int
-    # parameter is of type [Integer, Integer]
-    def get_piece (coords)
-      player = FFI::MemoryPointer.new(:int, 1)
-      piece = FFI::MemoryPointer.new(:int, 1)
-      Forchess.fc_board_get_piece(@board, player, piece, *(coords.reverse))
-      {:player => Player[player.get_int(0)], :piece => Piece[piece.get_int(0)]}
-    end
-
-    attach_function :fc_board_remove_piece, [:pointer, :int, :int], :int
-    def remove_piece (coords)
-      # TODO check return code for error
-      Forchess.fc_board_remove_piece(@board, *(coords.reverse))
     end
 
     attach_function :fc_board_get_moves, [:pointer, :pointer, Player], :void
@@ -74,17 +49,18 @@ module Forchess
       Forchess.fc_board_make_move(@board, move_obj.to_ptr)
     end
 
-    attach_function :fc_board_check_status, [:pointer, Player], :int
-    def check_status (player)
-      CheckStatus[Forchess.fc_board_check_status(@board, player)]
-    end
-
-    def check? (player)
-      self.check_status == :check
-    end
-
-    def checkmate? (player)
-      self.check_status == :checkmate
+    # coords is of type [[x1, y1], [x2, y2]]
+    def create_move (coords)
+      ret = Move.new nil, coords
+      hash = self.get_piece(coords[0])
+      ret.to_ptr[:player] = hash[:player]
+      ret.to_ptr[:piece] = hash[:piece]
+      hash = self.get_piece(coords[1])
+      ret.to_ptr[:opp_player] = hash[:player]
+      ret.to_ptr[:opp_piece] = hash[:piece]
+      ret.to_ptr[:move] = _coords_to_bitfield(coords)
+      ret.to_ptr[:value] = 0
+      ret
     end
 
     attach_function :fc_board_is_player_out, [:pointer, Player], :int
@@ -108,22 +84,23 @@ module Forchess
       bitfield = move.move
       return bitfield if bitfield.kind_of? Enumerable
 
-      coords = _get_coords_from_bitfield bitfield
+      coords = _bitfield_to_coords bitfield
       piece = self.get_piece coords[0]
       if piece[:piece] == move.piece and piece[:player] == move.player
         return coords
+
       elsif piece[:piece] == move.opp_piece and
             piece[:player] == move.opp_player
         return coords.reverse
+
       else
-        # TODO handle error
-        assert
+        raise Forchess::Assertion.new "#{piece}::#{move}"
       end
     end
 
     private
 
-    def _get_coords_from_bitfield (bf)
+    def _bitfield_to_coords (bf)
       coords = []
       64.times do |i|
         if ((2 ** i) & bf) != 0
@@ -131,6 +108,12 @@ module Forchess
         end
       end
       coords
+    end
+
+    def _coords_to_bitfield (coords)
+      start, finish = coords
+      bf = 2 ** (start[1] * 8 + start[0])
+      bf | (2 ** (finish[1] * 8 + finish[0]))
     end
   end
 end

@@ -1,0 +1,8 @@
+2 K h4
+2 P c2
+3 Q g1
+3 N d8
+4 R b6
+4 P f7
+1 K e5
+1 B a3
