@@ -56,7 +56,7 @@ module Forchess
       hash = self.get_piece(coords[0])
       ret.to_ptr[:player] = hash[:player]
       ret.to_ptr[:piece] = hash[:piece]
-      hash = self.get_piece(coords[1])
+      hash = (coords[1].nil?) ? Hash.new(:none) : self.get_piece(coords[1])
       ret.to_ptr[:opp_player] = hash[:player]
       ret.to_ptr[:opp_piece] = hash[:piece]
       ret.to_ptr[:move] = _coords_to_bitfield(coords)
@@ -79,7 +79,6 @@ module Forchess
       Forchess.fc_board_score_position(@board, player)
     end
 
-    # TODO ensure that this works with removes as well
     def coords_from_move (move_ptr)
       move = Move.new move_ptr
       bitfield = move.move
@@ -114,6 +113,7 @@ module Forchess
     def _coords_to_bitfield (coords)
       start, finish = coords
       bf = 2 ** (start[1] * 8 + start[0])
+      return bf if finish.nil?
       bf | (2 ** (finish[1] * 8 + finish[0]))
     end
   end

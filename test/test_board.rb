@@ -14,6 +14,7 @@ class BoardTest < Test::Unit::TestCase
     _get_moves
     _create_move
     _move_piece
+    _remove_piece
   end
 
   # stolen from test_forchess_checkmate in ext/libforchess/test/check_check.c
@@ -29,6 +30,34 @@ class BoardTest < Test::Unit::TestCase
     @board['d']['4'] = {:player => :first, :piece => :bishop}
     assert(@board.check? :first)
     assert(@board.checkmate? :second)
+  end
+
+  # tests stolen from ext/libforchess/test/check_board.c
+  def test_removes
+    # from test_forchess_board_get_valid_removes1
+    @board = Forchess::Board.new 'test/boards/board4.txt'
+    moves = @board.get_moves :first
+    assert_equal 1, moves.size
+    assert_equal :first, moves[0].player
+    assert_equal :king, moves[0].piece
+    assert_equal [[0,0]], moves[0].move
+
+    # from test_forchess_board_get_valid_removes2
+    @board = Forchess::Board.new 'test/boards/board5.txt'
+    moves = @board.get_moves :first
+    assert_equal 1, moves.size
+    assert_equal :first, moves[0].player
+    assert_equal :pawn, moves[0].piece
+    assert_equal [[1,1]], moves[0].move
+
+    # from test_forchess_board_get_valid_removes3
+    @board = Forchess::Board.new 'test/boards/board6.txt'
+    moves = @board.get_moves :first
+    list = moves.map { |m| m.move }
+    assert_equal 3, moves.size
+    [ [[0,1]], [[1,1]], [[1,0]] ].each do |result|
+      assert_not_nil(list.find result)
+    end
   end
 
   private
@@ -100,7 +129,9 @@ class BoardTest < Test::Unit::TestCase
                    [[2,1],[4,2]],
                    [[1,1],[2,2]] ]
     @board = Forchess::Board.new 'test/boards/board2.txt'
-    list = @board.get_moves(0)
+    moves = @board.get_moves(0)
+    list = moves.map { |m| m.move }
+    assert_equal 12, moves.size
     result_set.each do |result|
       assert_not_nil(list.find result)
     end
@@ -124,5 +155,18 @@ class BoardTest < Test::Unit::TestCase
     assert_equal :queen, @board['b']['8'][:piece]
     assert_equal :none, @board['a']['4'][:player]
     assert_equal :none, @board['a']['4'][:piece]
+  end
+
+  def _remove_piece
+    coords = [[7,7]]
+    rm = @board.create_move coords
+    assert_equal :third, rm.player
+    assert_equal :king, rm.piece
+    assert_equal :none, rm.opp_player
+    assert_equal :none, rm.opp_piece
+    assert_equal coords, rm.move
+    @board.move rm
+    assert_equal :none, @board['h']['8'][:player]
+    assert_equal :none, @board['h']['8'][:piece]
   end
 end
