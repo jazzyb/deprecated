@@ -1,3 +1,4 @@
+require 'forchess/ai'
 require 'forchess/board'
 require 'forchess/move'
 require 'forchess/move_list'
