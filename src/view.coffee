@@ -1,15 +1,13 @@
+darkCell = "#8B7355"
+lightCell = "#FFD39B"
+
 buildCell = (row, i, j) ->
   cell = row.insertCell(-1)
   cell.setAttribute("id", "cell_" + j + i)
   cell.setAttribute("width", "80")
   cell.setAttribute("height", "80")
-
-  dark = "#8B7355"
-  light = "#FFD39B"
-  if (j % 2) != (i % 2)
-    cell.setAttribute("style", "background-color:" + dark)
-  else
-    cell.setAttribute("style", "background-color:" + light)
+  value = if (j % 2) != (i % 2) then darkCell else lightCell
+  cell.setAttribute("style", "background-color:" + value)
 
 buildRow = (table, cols, i) ->
   row = table.insertRow(-1)
