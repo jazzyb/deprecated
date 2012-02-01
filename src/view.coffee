@@ -28,7 +28,7 @@ createBoard = (rows, cols) ->
 setPiece = (color, piece, row, col) ->
   pos = document.getElementById("cell_" + col + row)
   img = document.createElement("img")
-  img.setAttribute("src", "images/" + color + "/" + piece + ".svg")
+  img.setAttribute("src", "img/" + color + "/" + piece + ".svg")
   img.setAttribute("width", pos.getAttribute("width"))
   img.setAttribute("height", pos.getAttribute("height"))
   pos.appendChild(img)
