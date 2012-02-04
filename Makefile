@@ -1,5 +1,5 @@
 LIB_FILES = lib/view.js
-TARGET = lib/all.js
+TARGET = lib/forchess.js
 
 COMPILER = coffee
 CFLAGS = --bare --lint
