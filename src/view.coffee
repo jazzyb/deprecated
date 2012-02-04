@@ -23,10 +23,13 @@ createBoard = (rows, cols) ->
   buildRow(table, cols, i) for i in [rows..1]
   document.documentElement.appendChild(table)
 
+imageFile = (color, piece) ->
+  "img/" + color + "/" + piece + ".svg"
+
 setPiece = (color, piece, row, col) ->
   pos = document.getElementById("cell_" + col + row)
   img = document.createElement("img")
-  img.setAttribute("src", "img/" + color + "/" + piece + ".svg")
+  img.setAttribute("src", imageFile(color, piece))
   img.setAttribute("width", pos.getAttribute("width"))
   img.setAttribute("height", pos.getAttribute("height"))
   pos.appendChild(img)
@@ -34,3 +37,12 @@ setPiece = (color, piece, row, col) ->
 removePiece = (row, col) ->
   pos = document.getElementById("cell_" + col + row)
   pos.removeChild(pos.firstChild)
+
+changeColors = (from , to) ->
+  re = new RegExp("img\/" + from + "\/(.*)\.svg")
+  for i in [1..8]
+    for j in [1..8]
+      img = document.getElementById("cell_" + i + j).firstChild
+      src = img?.getAttribute("src")
+      match = re.exec(src)
+      img.setAttribute("src", imageFile(to, match[1])) if match?
