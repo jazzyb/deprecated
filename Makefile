@@ -14,5 +14,15 @@ lib/%.js: src/%.coffee
 build: $(LIB_FILES)
 	bash -c '$(OBFUSCATER) $(OPT_FLAGS) $(JS_FILES) --js_output_file=$(TARGET)'
 
+
+TEST_FILES = test/js/test_view.js
+
+test/js/test_%.js: test/coffee/test_%.coffee
+	$(COMPILER) $(CFLAGS) --output test/js/ --compile $<
+
+test: $(LIB_FILES) $(TEST_FILES)
+	ln -s test/index.html test.html
+
+
 clean:
-	rm -rf lib/
+	rm -rf lib/ test.html test/js/

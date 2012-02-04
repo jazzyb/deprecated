@@ -35,7 +35,7 @@ removePiece = (row, col) ->
   pos = document.getElementById("cell_" + col + row)
   pos.removeChild(pos.firstChild)
 
-createBoard(8,8)
-setPiece('red', 'rook', 8, 3)
-setPiece('green', 'king', 2, 7)
-removePiece(8, 3)
+#createBoard(8,8)
+#setPiece('red', 'rook', 8, 3)
+#setPiece('green', 'king', 2, 7)
+#removePiece(8, 3)
