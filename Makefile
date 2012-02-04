@@ -21,7 +21,7 @@ test/js/test_%.js: test/coffee/test_%.coffee
 	$(COMPILER) $(CFLAGS) --output test/js/ --compile $<
 
 test: $(LIB_FILES) $(TEST_FILES)
-	ln -s test/index.html test.html
+	ln -sf test/index.html test.html
 
 
 clean:
