@@ -20,13 +20,17 @@ endif
 CHECK_FLAGS=$(CHECK_INC) $(CHECK_LIB)
 
 TEST_FILES=test/check_holdem.c \
-	   test/check_card.c
+	   test/check_card.c \
+	   test/check_hand.c
 
-INC_FILES=include/holdem/card.h
+INC_FILES=include/holdem/card.h \
+	  include/holdem/hand.h
 
-SRC_FILES=src/card.c
+SRC_FILES=src/card.c \
+	  src/hand.c
 
-OBJ_FILES=src/card.o
+OBJ_FILES=src/card.o \
+	  src/hand.o
 
 %.o: %.c $(INC_FILES)
 	$(CC) -c -o $@ $(CFLAGS) $(WARN_FLAGS) $(INCLUDES) $<
