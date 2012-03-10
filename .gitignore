@@ -1,0 +1,5 @@
+.gitignore
+test_all
+a.out 
+*.o 
+lib/
