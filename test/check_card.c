@@ -26,12 +26,23 @@ START_TEST (test_card_cmp)
 }
 END_TEST
 
+START_TEST (test_card_copy)
+{
+	txh_card_t c1, c2;
+
+	txh_card_init(&c1, TXH_2, TXH_HEARTS);
+	txh_card_copy(&c2, &c1);
+	fail_unless(c2.rank == TXH_2 && c2.suit == TXH_HEARTS);
+}
+END_TEST
+
 Suite *card_suite (void)
 {
 	Suite *s = suite_create("Card");
 	TCase *tc_card = tcase_create("Core");
 	tcase_add_test(tc_card, test_card_init);
 	tcase_add_test(tc_card, test_card_cmp);
+	tcase_add_test(tc_card, test_card_copy);
 	suite_add_tcase(s, tc_card);
 	return s;
 }

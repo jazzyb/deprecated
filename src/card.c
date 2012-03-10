@@ -18,3 +18,10 @@ int txh_card_cmp (txh_card_t *a, txh_card_t *b)
 	}
 }
 
+int txh_card_copy (txh_card_t *to, txh_card_t *from)
+{
+	to->rank = from->rank;
+	to->suit = from->suit;
+	return 1;
+}
+
