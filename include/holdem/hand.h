@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include <holdem/card.h>
+#include <holdem/combo.h>
 
 typedef enum {
 	TXH_NONE = 0,
@@ -18,9 +19,6 @@ typedef enum {
 	TXH_STRAIGHT_FLUSH,
 	TXH_N_HAND_CATS
 } txh_hand_cat_t;
-
-/* the maximum number of cards each player can have per hand in texas holdem */
-#define TXH_MAX_CARDS 7
 
 /* the number of cards that make up a poker hand */
 #define TXH_HAND_SIZE 5
