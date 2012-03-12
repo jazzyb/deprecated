@@ -63,16 +63,9 @@ static void set_card_order_of_eval (txh_hand_t *hand, int *ranks)
 			break;
 
 		case TXH_QUADS:
-			if (ranks[i] == 4) {
-				hand->order_of_eval[0] = i;
-			} else {
-				hand->order_of_eval[1] = i;
-			}
-			break;
-
 		case TXH_FULL_HOUSE:
 		case TXH_TRIPS:
-			if (ranks[i] == 3) {
+			if (ranks[i] == 3 || ranks[i] == 4) {
 				hand->order_of_eval[0] = i;
 			} else {
 				hand->order_of_eval[1 + j++] = i;
