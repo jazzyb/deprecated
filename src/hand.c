@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <strings.h>
@@ -31,6 +32,76 @@ int txh_hand_size (txh_hand_t *hand)
 
 #define STRAIGHT_MATCH 0x1f
 
+/*
+ * Determines and sets the order that the cards in the high hand need to be
+ * evaluated.  'ranks' is an array of the number of times a card of a
+ * particular rank is in the hand ordered by rank, e.g. rank[TXH_J] will be
+ * the number of jacks that are in the high_hand.
+ */
+static void set_card_order_of_eval (txh_hand_t *hand, int *ranks)
+{
+	int i, j = 0;
+	int pair = 0;
+
+	for (i = TXH_N_RANKS - 1; i >= 0; i--) {
+		if (ranks[i] == 0) {
+			continue;
+		}
+
+		switch (hand->type) {
+		case TXH_STRAIGHT_FLUSH:
+		case TXH_STRAIGHT:
+			/* check for the wheel */
+			if (i == TXH_A && ranks[TXH_5]) {
+				hand->order_of_eval[TXH_HAND_SIZE - 1] = i;
+				break;
+			}
+			/* fall through */
+		case TXH_FLUSH:
+		case TXH_HIGH_CARD:
+			hand->order_of_eval[j++] = i;
+			break;
+
+		case TXH_QUADS:
+			if (ranks[i] == 4) {
+				hand->order_of_eval[0] = i;
+			} else {
+				hand->order_of_eval[1] = i;
+			}
+			break;
+
+		case TXH_FULL_HOUSE:
+		case TXH_TRIPS:
+			if (ranks[i] == 3) {
+				hand->order_of_eval[0] = i;
+			} else {
+				hand->order_of_eval[1 + j++] = i;
+			}
+			break;
+
+		case TXH_TWO_PAIR:
+			if (ranks[i] == 2) {
+				hand->order_of_eval[pair++] = i;
+			} else {
+				hand->order_of_eval[2] = i;
+			}
+			break;
+
+		case TXH_PAIR:
+			if (ranks[i] == 2) {
+				hand->order_of_eval[0] = i;
+			} else {
+				hand->order_of_eval[1 + j++] = i;
+			}
+			break;
+
+		default:
+			assert(0);
+			break;
+		}
+	}
+}
+
 static int is_straight (txh_card_t *cards)
 {
 	int i;
@@ -42,12 +113,12 @@ static int is_straight (txh_card_t *cards)
 		rank = txh_card_rank(cards + i);
 		ranks |= 1 << (rank + 1);
 		if (rank == TXH_A) {
-			ranks |= 1; /* checking for the wheel */
+			ranks |= 1; /* check for the wheel */
 		}
 	}
 
-	for (match = STRAIGHT_MATCH; ranks >= match; match <<= 1) {
-		if (ranks == match) {
+	for (match = STRAIGHT_MATCH; ranks >= match; ranks >>= 1) {
+		if ((ranks & match) == STRAIGHT_MATCH) {
 			return 1;
 		}
 	}
@@ -62,65 +133,128 @@ static int is_flush (txh_card_t *cards)
 		txh_card_suit(&cards[3]) == txh_card_suit(&cards[4]);
 }
 
-static txh_hand_type_t rank_cards (txh_card_t *cards)
+/*
+ * Determines the hand type of the high hand in 'hand'.  Sets 'hand->type' to
+ * the determined value.
+ */
+static void rank_high_hand (txh_hand_t *hand)
 {
 	int i, straight, flush;
 	int ranks[TXH_N_RANKS];
 	txh_rank_t rank;
 	txh_hand_type_t type;
 
-	straight = is_straight(cards);
-	flush = is_flush(cards);
+	straight = is_straight(hand->high_hand);
+	flush = is_flush(hand->high_hand);
 	if (straight && flush) {
-		return TXH_STRAIGHT_FLUSH;
+		type = TXH_STRAIGHT_FLUSH;
 	} else if (straight) {
-		return TXH_STRAIGHT;
+		type = TXH_STRAIGHT;
 	} else if (flush) {
-		return TXH_FLUSH;
+		type = TXH_FLUSH;
+	} else {
+		type = TXH_HIGH_CARD;
 	}
 
-	type = TXH_HIGH_CARD;
-	bzero(ranks, TXH_N_RANKS * sizeof(int));
+	bzero(ranks, TXH_N_RANKS * sizeof(*ranks));
 	for (i = 0; i < TXH_HAND_SIZE; i++) {
-		rank = txh_card_rank(cards + i);
+		rank = txh_card_rank(hand->high_hand + i);
 		ranks[rank] += 1;
 		switch (ranks[rank]) {
 		case 4:
-			return TXH_QUADS;
+			type = TXH_QUADS;
+			break;
 		case 3:
 			if (type == TXH_PAIR) {
 				type = TXH_TRIPS;
 			} else if (type == TXH_TWO_PAIR) {
-				return TXH_FULL_HOUSE;
+				type = TXH_FULL_HOUSE;
 			}
 			break;
 		case 2:
 			if (type == TXH_TRIPS) {
-				return TXH_FULL_HOUSE;
+				type = TXH_FULL_HOUSE;
 			} else if (type == TXH_PAIR) {
 				type = TXH_TWO_PAIR;
 			} else {
 				type = TXH_PAIR;
 			}
 			break;
-		default: break;
+		default:
+			break;
 		}
 	}
-	return type;
+
+	hand->type = type;
+	set_card_order_of_eval(hand, ranks);
 }
 
+/*
+ * Same return condition as txh_hand_cmp below.
+ */
+static int int_cmp (int a, int b)
+{
+	if (a > b) {
+		return 1;
+	} else if (a < b) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+/*
+ * Returns 0 if a and b are equal, 1 if a > b, and -1 if a < b.
+ */
 int txh_hand_cmp (txh_hand_t *a, txh_hand_t *b)
 {
-	txh_hand_type_t a_type, b_type;
+	int i, rc, finish;
 
-	a_type = txh_hand_type(a);
-	b_type = txh_hand_type(b);
-	if (a_type > b_type) {
-		return 1;
-	} else if (a_type < b_type) {
-		return -1;
+	if (a->n_cards < TXH_HAND_SIZE && b->n_cards < TXH_HAND_SIZE) {
+		/* unless it's a complete hand, we simply don't care */
+		return 0;
 	}
-	/* TODO If they are equal, then compare attributes. */
+	rc = int_cmp(txh_hand_type(a), txh_hand_type(b));
+	if (rc) {
+		return rc;
+	}
+
+	/*
+	 * NOTE: Hard-coded numbers.  If the value of TXH_HAND_SIZE ever
+	 * changes, then these will need to be changed.  Assumes
+	 * TXH_HAND_SIZE == 5.
+	 */
+	switch (a->type) {
+	case TXH_STRAIGHT_FLUSH:
+	case TXH_STRAIGHT:
+		finish = 1;
+		break;
+	case TXH_FLUSH:
+	case TXH_HIGH_CARD:
+		finish = 5;
+		break;
+	case TXH_QUADS:
+	case TXH_FULL_HOUSE:
+		finish = 2;
+		break;
+	case TXH_TRIPS:
+	case TXH_TWO_PAIR:
+		finish = 3;
+		break;
+	case TXH_PAIR:
+		finish = 4;
+		break;
+	default:
+		finish = 0;
+		assert(0);
+	}
+
+	for (i = 0; i < finish; i++) {
+		rc = int_cmp(a->order_of_eval[i], b->order_of_eval[i]);
+		if (rc) {
+			return rc;
+		}
+	}
 	return 0;
 }
 
@@ -138,7 +272,7 @@ txh_hand_type_t txh_hand_type (txh_hand_t *hand)
 	} else if (hand->n_cards == TXH_HAND_SIZE) {
 		memcpy(hand->high_hand, hand->cards,
 				TXH_HAND_SIZE * sizeof(txh_card_t));
-		hand->type = rank_cards(hand->high_hand);
+		rank_high_hand(hand);
 		return hand->type;
 	}
 
@@ -149,9 +283,11 @@ txh_hand_type_t txh_hand_type (txh_hand_t *hand)
 		txh_hand_init(&tmp_hand, TXH_HAND_SIZE, tmp_ptr);
 		if (hand->type == TXH_NONE ||
 				txh_hand_cmp(&tmp_hand, hand) > 0) {
-			hand->type = tmp_hand.type;
+			hand->type = txh_hand_type(&tmp_hand);
 			memcpy(hand->high_hand, tmp_hand.high_hand,
 					TXH_HAND_SIZE * sizeof(txh_card_t));
+			memcpy(hand->order_of_eval, tmp_hand.order_of_eval,
+					TXH_HAND_SIZE * sizeof(txh_rank_t));
 		}
 	}
 	txh_combo_free(&combo);

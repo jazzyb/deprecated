@@ -31,6 +31,9 @@ typedef struct {
 	/* 'high_hand' is the best hand given the cards in 'cards'
 	 * 'high_hand' is only set if 'n_cards' is >= 5 */
 	txh_card_t high_hand[TXH_HAND_SIZE];
+	/* 'order_of_eval' is the order that the cards in 'high_hand' should
+	 * be evaluated */
+	txh_rank_t order_of_eval[TXH_HAND_SIZE];
 } txh_hand_t;
 
 /*
@@ -43,6 +46,8 @@ int txh_hand_init (txh_hand_t *hand, size_t size, txh_card_t *cards);
 txh_card_t *txh_hand_cards (txh_hand_t *hand);
 
 int txh_hand_size (txh_hand_t *hand);
+
+int txh_hand_cmp (txh_hand_t *a, txh_hand_t *b);
 
 txh_hand_type_t txh_hand_type (txh_hand_t *hand);
 
