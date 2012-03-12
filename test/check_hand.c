@@ -12,7 +12,7 @@ START_TEST (test_hand_init)
 	}
 	txh_hand_init(&hand, 4, cards);
 	fail_unless(memcmp(hand.cards, cards, sizeof(cards)) == 0);
-	fail_unless(hand.type == TXH_NONE);
+	fail_unless(hand.type == TXH_UNKNOWN);
 	fail_unless(hand.n_cards == 4);
 }
 END_TEST

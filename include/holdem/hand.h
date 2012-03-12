@@ -7,6 +7,7 @@
 #include <holdem/combo.h>
 
 typedef enum {
+	TXH_UNKNOWN = -1,
 	TXH_NONE = 0,
 	TXH_HIGH_CARD,
 	TXH_PAIR,
@@ -17,19 +18,19 @@ typedef enum {
 	TXH_FULL_HOUSE,
 	TXH_QUADS,
 	TXH_STRAIGHT_FLUSH,
-	TXH_N_HAND_CATS
-} txh_hand_cat_t;
+	TXH_N_HAND_TYPES
+} txh_hand_type_t;
 
 /* the number of cards that make up a poker hand */
 #define TXH_HAND_SIZE 5
 
 typedef struct {
-	txh_hand_cat_t type;
+	txh_hand_type_t type;
 	txh_card_t cards[TXH_MAX_CARDS];
 	size_t n_cards;
 	/* 'high_hand' is the best hand given the cards in 'cards'
 	 * 'high_hand' is only set if 'n_cards' is >= 5 */
-	txh_card_t *high_hand[TXH_HAND_SIZE];
+	txh_card_t high_hand[TXH_HAND_SIZE];
 } txh_hand_t;
 
 /*
@@ -38,5 +39,11 @@ typedef struct {
  * 0, then 'type' is simply set to TXH_NONE.
  */
 int txh_hand_init (txh_hand_t *hand, size_t size, txh_card_t *cards);
+
+txh_card_t *txh_hand_cards (txh_hand_t *hand);
+
+int txh_hand_size (txh_hand_t *hand);
+
+txh_hand_type_t txh_hand_type (txh_hand_t *hand);
 
 #endif

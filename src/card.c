@@ -7,6 +7,16 @@ int txh_card_init (txh_card_t *card, txh_rank_t rank, txh_suit_t suit)
 	return 1;
 }
 
+txh_rank_t txh_card_rank (txh_card_t *card)
+{
+	return card->rank;
+}
+
+txh_suit_t txh_card_suit (txh_card_t *card)
+{
+	return card->suit;
+}
+
 int txh_card_cmp (txh_card_t *a, txh_card_t *b)
 {
 	if (a->rank < b->rank) {
