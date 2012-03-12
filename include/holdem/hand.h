@@ -51,4 +51,10 @@ int txh_hand_cmp (txh_hand_t *a, txh_hand_t *b);
 
 txh_hand_type_t txh_hand_type (txh_hand_t *hand);
 
+/*
+ * Appends the given cards onto the end of the hand.  Returns 0 if the cards
+ * could not be appended; 1 on success.
+ */
+int txh_hand_append (txh_hand_t *hand, size_t n_cards, txh_card_t *cards);
+
 #endif

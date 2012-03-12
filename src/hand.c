@@ -10,11 +10,13 @@ int txh_hand_init (txh_hand_t *hand, size_t size, txh_card_t *cards)
 {
 	int i;
 
+	if (size < 0 || size > TXH_MAX_CARDS) {
+		return 0;
+	}
+
 	hand->n_cards = size;
-	if (size > 0) {
-		for (i = 0; i < size; i++) {
-			txh_card_copy(hand->cards + i, cards + i);
-		}
+	for (i = 0; i < size; i++) {
+		txh_card_copy(hand->cards + i, cards + i);
 	}
 	hand->type = TXH_UNKNOWN;
 	return 1;
@@ -285,5 +287,21 @@ txh_hand_type_t txh_hand_type (txh_hand_t *hand)
 	}
 	txh_combo_free(&combo);
 	return hand->type;
+}
+
+int txh_hand_append (txh_hand_t *hand, size_t n_cards, txh_card_t *cards)
+{
+	int i;
+
+	if (n_cards < 1 || hand->n_cards + n_cards > TXH_MAX_CARDS) {
+		return 0;
+	}
+
+	for (i = 0; i < n_cards; i++) {
+		txh_card_copy(hand->cards + hand->n_cards + i, cards + i);
+	}
+	hand->n_cards += n_cards;
+	hand->type = TXH_UNKNOWN;
+	return 1;
 }
 

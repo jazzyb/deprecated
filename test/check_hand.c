@@ -1,6 +1,7 @@
 #include <check.h>
 #include <holdem/card.h>
 #include <holdem/hand.h>
+#include <stdio.h>
 
 START_TEST (test_hand_init)
 {
@@ -10,10 +11,13 @@ START_TEST (test_hand_init)
 	for (int i = 0; i < 4; i++) {
 		txh_card_init(cards + i, i, i);
 	}
-	txh_hand_init(&hand, 4, cards);
+	fail_unless(txh_hand_init(&hand, 4, cards));
 	fail_unless(memcmp(hand.cards, cards, sizeof(cards)) == 0);
 	fail_unless(hand.type == TXH_UNKNOWN);
 	fail_unless(hand.n_cards == 4);
+
+	fail_unless(!txh_hand_init(&hand, 8, cards));
+	fail_unless(!txh_hand_init(&hand, -1, cards));
 }
 END_TEST
 
@@ -585,6 +589,33 @@ START_TEST (test_cmp_straight_flushes)
 }
 END_TEST
 
+START_TEST (test_hand_append)
+{
+	txh_hand_t h1;
+	txh_card_t c1[5];
+	txh_card_t c2[5];
+
+	txh_card_init(&c1[0], TXH_8, TXH_DIAMONDS);
+	txh_card_init(&c1[1], TXH_6, TXH_DIAMONDS);
+	txh_card_init(&c1[2], TXH_T, TXH_CLUBS);
+	txh_card_init(&c1[3], TXH_2, TXH_SPADES);
+	txh_card_init(&c1[4], TXH_4, TXH_DIAMONDS);
+	txh_hand_init(&h1, 5, c1);
+
+	txh_card_init(&c2[0], TXH_8, TXH_SPADES);
+	txh_card_init(&c2[1], TXH_6, TXH_CLUBS);
+	txh_card_init(&c2[2], TXH_T, TXH_CLUBS);
+	txh_card_init(&c2[3], TXH_2, TXH_SPADES);
+	txh_card_init(&c2[4], TXH_5, TXH_DIAMONDS);
+
+	fail_unless(txh_hand_append(&h1, 2, c2));
+	fail_unless(h1.cards[5].rank == TXH_8 && h1.cards[5].suit == TXH_SPADES);
+	fail_unless(h1.cards[6].rank == TXH_6 && h1.cards[6].suit == TXH_CLUBS);
+	fail_unless(txh_hand_type(&h1) == TXH_TWO_PAIR);
+	fail_unless(!txh_hand_append(&h1, 1, c2));
+}
+END_TEST
+
 Suite *hand_suite (void)
 {
 	Suite *s = suite_create("Hand");
@@ -609,6 +640,7 @@ Suite *hand_suite (void)
 	tcase_add_test(tc_hand, test_cmp_full_houses);
 	tcase_add_test(tc_hand, test_cmp_quads);
 	tcase_add_test(tc_hand, test_cmp_straight_flushes);
+	tcase_add_test(tc_hand, test_hand_append);
 	suite_add_tcase(s, tc_hand);
 	return s;
 }
