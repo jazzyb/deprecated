@@ -19,13 +19,7 @@ txh_suit_t txh_card_suit (txh_card_t *card)
 
 int txh_card_cmp (txh_card_t *a, txh_card_t *b)
 {
-	if (a->rank < b->rank) {
-		return -1;
-	} else if (a->rank > b->rank) {
-		return 1;
-	} else {
-		return 0;
-	}
+	return a->rank - b->rank;
 }
 
 /*

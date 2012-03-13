@@ -189,17 +189,11 @@ static void rank_high_hand (txh_hand_t *hand)
  */
 static int int_cmp (int a, int b)
 {
-	if (a > b) {
-		return 1;
-	} else if (a < b) {
-		return -1;
-	} else {
-		return 0;
-	}
+	return a - b;
 }
 
 /*
- * Returns 0 if a and b are equal, 1 if a > b, and -1 if a < b.
+ * Returns 0 if a and b are equal, positive if a > b, and negative if a < b.
  */
 int txh_hand_cmp (txh_hand_t *a, txh_hand_t *b)
 {
