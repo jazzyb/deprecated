@@ -39,6 +39,8 @@ txh_suit_t txh_card_suit (txh_card_t *card);
 
 int txh_card_cmp (txh_card_t *a, txh_card_t *b);
 
+int txh_card_is_equal (txh_card_t *a, txh_card_t *b);
+
 int txh_card_copy (txh_card_t *to, txh_card_t *from);
 
 #endif

@@ -28,6 +28,14 @@ int txh_card_cmp (txh_card_t *a, txh_card_t *b)
 	}
 }
 
+/*
+ * Returns 1 if a and b are exactly the same card; 0 otherwise.
+ */
+int txh_card_is_equal (txh_card_t *a, txh_card_t *b)
+{
+	return (a->rank == b->rank) && (a->suit == b->suit);
+}
+
 int txh_card_copy (txh_card_t *to, txh_card_t *from)
 {
 	to->rank = from->rank;

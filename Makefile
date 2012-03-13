@@ -22,18 +22,22 @@ CHECK_FLAGS=$(CHECK_INC) $(CHECK_LIB)
 TEST_FILES=test/check_holdem.c \
 	   test/check_card.c \
 	   test/check_combo.c \
+	   test/check_deck.c \
 	   test/check_hand.c
 
 INC_FILES=include/holdem/card.h \
 	  include/holdem/combo.h \
+	  include/holdem/deck.h \
 	  include/holdem/hand.h
 
 SRC_FILES=src/card.c \
 	  src/combo.c \
+	  src/deck.c \
 	  src/hand.c
 
 OBJ_FILES=src/card.o \
 	  src/combo.o \
+	  src/deck.o \
 	  src/hand.o
 
 %.o: %.c $(INC_FILES)
