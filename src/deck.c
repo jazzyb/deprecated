@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdlib.h>
 
 #include <holdem/card.h>
 #include <holdem/deck.h>
@@ -63,5 +64,22 @@ int txh_deck_deal (txh_deck_t *deck, txh_card_t *cards, int num)
 	}
 	deck->n_cards -= num;
 	return 1;
+}
+
+void txh_deck_shuffle (txh_deck_t *deck, int (*random_cb)(void))
+{
+	int i, r_idx;
+	txh_card_t tmp;
+
+	if (!random_cb) {
+		random_cb = &rand;
+	}
+
+	for (i = deck->n_cards - 1; i > 0; i--) {
+		r_idx = random_cb() % (i + 1);
+		txh_card_copy(&tmp, deck->cards + i);
+		txh_card_copy(deck->cards + i, deck->cards + r_idx);
+		txh_card_copy(deck->cards + r_idx, &tmp);
+	}
 }
 

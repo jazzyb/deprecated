@@ -1,6 +1,7 @@
 #include <check.h>
 #include <holdem/card.h>
 #include <holdem/deck.h>
+#include <stdlib.h>
 
 static int list_includes_card (txh_card_t *list, int count, txh_card_t *card)
 {
@@ -47,12 +48,27 @@ START_TEST (test_deck_deal)
 }
 END_TEST
 
+START_TEST (test_deck_shuffle)
+{
+	txh_deck_t deck;
+	txh_deck_init(&deck, 0, NULL);
+	srand(1234567890);
+	txh_deck_shuffle(&deck, NULL);
+	fail_unless(deck.cards[0].rank == TXH_3 && deck.cards[0].suit == TXH_HEARTS);
+	fail_unless(deck.cards[1].rank == TXH_5 && deck.cards[1].suit == TXH_SPADES);
+	txh_deck_shuffle(&deck, &rand);
+	fail_unless(deck.cards[0].rank == TXH_8 && deck.cards[0].suit == TXH_CLUBS);
+	fail_unless(deck.cards[1].rank == TXH_9 && deck.cards[1].suit == TXH_SPADES);
+}
+END_TEST
+
 Suite *deck_suite (void)
 {
 	Suite *s = suite_create("Deck");
 	TCase *tc_deck = tcase_create("Core");
 	tcase_add_test(tc_deck, test_deck_init);
 	tcase_add_test(tc_deck, test_deck_deal);
+	tcase_add_test(tc_deck, test_deck_shuffle);
 	suite_add_tcase(s, tc_deck);
 	return s;
 }

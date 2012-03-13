@@ -31,4 +31,11 @@ int txh_deck_size (txh_deck_t *deck);
  */
 int txh_deck_deal (txh_deck_t *deck, txh_card_t *cards, int num);
 
+/*
+ * Shuffles the deck using the subroutine random_cb to generate random
+ * numbers.  If random_cb is NULL, then stdlib's rand() is used.  The function
+ * assumes that the caller has seeded the random number generator before-hand.
+ */
+void txh_deck_shuffle (txh_deck_t *deck, int (*random_cb)(void));
+
 #endif
