@@ -38,8 +38,6 @@ int txh_hand_size (txh_hand_t *hand)
 	return hand->n_cards;
 }
 
-#define STRAIGHT_MATCH 0x1f
-
 /*
  * Determines and sets the order that the cards in the high hand need to be
  * evaluated.  'ranks' is an array of the number of times a card of a
@@ -102,6 +100,8 @@ static void set_card_order_of_eval (txh_hand_t *hand, int *ranks)
 		}
 	}
 }
+
+#define STRAIGHT_MATCH 0x1f
 
 static int is_straight (txh_card_t *cards)
 {
