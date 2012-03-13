@@ -33,4 +33,6 @@ txh_card_t *txh_combo_get_cards (txh_combo_iter_t *combo);
 
 void txh_combo_free (txh_combo_iter_t *combo);
 
+unsigned int txh_num_combinations (unsigned int n, unsigned int k);
+
 #endif

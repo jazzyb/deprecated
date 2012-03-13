@@ -22,6 +22,12 @@ int txh_hand_init (txh_hand_t *hand, size_t size, txh_card_t *cards)
 	return 1;
 }
 
+int txh_hand_copy (txh_hand_t *to, txh_hand_t *from)
+{
+	memcpy(to, from, sizeof(*to));
+	return 1;
+}
+
 txh_card_t *txh_hand_cards (txh_hand_t *hand)
 {
 	return hand->cards;

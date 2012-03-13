@@ -49,6 +49,8 @@ int txh_hand_size (txh_hand_t *hand);
 
 int txh_hand_cmp (txh_hand_t *a, txh_hand_t *b);
 
+int txh_hand_copy (txh_hand_t *to, txh_hand_t *from);
+
 txh_hand_type_t txh_hand_type (txh_hand_t *hand);
 
 /*

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <check.h>
 #include <holdem/card.h>
 #include <holdem/combo.h>
@@ -83,6 +84,18 @@ START_TEST (test_combo_get_cards)
 }
 END_TEST
 
+START_TEST (test_num_combinations)
+{
+	fail_unless(txh_num_combinations(5, 6) == 0);
+	fail_unless(txh_num_combinations(5, 0) == 1);
+	fail_unless(txh_num_combinations(5, 5) == 1);
+	fail_unless(txh_num_combinations(52, 2) == 1326);
+	fail_unless(txh_num_combinations(47, 4) == 178365);
+	fail_unless(txh_num_combinations(49, 4) == 211876);
+	fail_unless(txh_num_combinations(52, 7) == 133784560);
+}
+END_TEST
+
 Suite *combo_suite (void)
 {
 	Suite *s = suite_create("Combo");
@@ -90,6 +103,7 @@ Suite *combo_suite (void)
 	tcase_add_test(tc_combo, test_combo_init);
 	tcase_add_test(tc_combo, test_combo_next);
 	tcase_add_test(tc_combo, test_combo_get_cards);
+	tcase_add_test(tc_combo, test_num_combinations);
 	suite_add_tcase(s, tc_combo);
 	return s;
 }

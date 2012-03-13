@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include <holdem/card.h>
@@ -120,5 +121,41 @@ txh_card_t *txh_combo_get_cards (txh_combo_iter_t *combo)
 void txh_combo_free (txh_combo_iter_t *combo)
 {
 	free(combo->src);
+}
+
+/*
+ * Calculates the result of C(n, k), "n choose k", to determine how many
+ * combinations of k items can be made from a set of n items:
+ *
+ *                          n!
+ *                     -----------
+ *                     k! (n - k)!
+ */
+unsigned int txh_num_combinations (unsigned int n, unsigned int k)
+{
+	uint64_t i, low, high, numerator, denominator;
+
+	if (k > n) {
+		return 0;
+	}
+
+	if (n - k > k) {
+		high = n - k;
+		low = k;
+	} else {
+		high = k;
+		low = n - k;
+	}
+
+	numerator = 1;
+	for (i = high + 1; i <= n; i++) {
+		numerator *= i;
+	}
+
+	denominator = 1;
+	for (i = 2; i <= low; i++) {
+		denominator *= i;
+	}
+	return (unsigned int)(numerator / denominator);
 }
 
