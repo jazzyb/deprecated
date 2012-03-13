@@ -45,6 +45,13 @@ int txh_hand_init (txh_hand_t *hand, size_t size, txh_card_t *cards);
 
 txh_card_t *txh_hand_cards (txh_hand_t *hand);
 
+/*
+ * Returns the best five-card combination of the cards in hand.  If the hand
+ * does not contain at least five cards, then it returns the same value as
+ * txh_hand_cards.
+ */
+txh_card_t *txh_hand_best (txh_hand_t *hand);
+
 int txh_hand_size (txh_hand_t *hand);
 
 int txh_hand_cmp (txh_hand_t *a, txh_hand_t *b);

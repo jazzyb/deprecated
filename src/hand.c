@@ -33,6 +33,15 @@ txh_card_t *txh_hand_cards (txh_hand_t *hand)
 	return hand->cards;
 }
 
+txh_card_t *txh_hand_best (txh_hand_t *hand)
+{
+	if (hand->n_cards < TXH_HAND_SIZE) {
+		return txh_hand_cards(hand);
+	}
+	(void)txh_hand_type(hand); /* make sure that the high_hand exists */
+	return hand->high_hand;
+}
+
 int txh_hand_size (txh_hand_t *hand)
 {
 	return hand->n_cards;
