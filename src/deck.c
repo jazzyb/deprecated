@@ -18,7 +18,8 @@ static int list_includes_card (txh_card_t *minus, int count, txh_card_t *card)
 
 int txh_deck_init (txh_deck_t *deck, size_t count, txh_card_t *minus)
 {
-	int i, j;
+	txh_rank_t rank;
+	txh_suit_t suit;
 	txh_card_t card;
 
 	if (count < 0 || count > TXH_MAX_DECK_SIZE) {
@@ -26,9 +27,9 @@ int txh_deck_init (txh_deck_t *deck, size_t count, txh_card_t *minus)
 	}
 
 	deck->n_cards = 0;
-	for (i = 0; i < TXH_N_RANKS; i++) {
-		for (j = 0; j < TXH_N_SUITS; j++) {
-			txh_card_init(&card, i, j);
+	for (rank = 0; rank < TXH_N_RANKS; rank++) {
+		for (suit = 0; suit < TXH_N_SUITS; suit++) {
+			txh_card_init(&card, rank, suit);
 			if (minus && list_includes_card(minus, count, &card)) {
 				continue;
 			}
