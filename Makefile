@@ -12,13 +12,6 @@ INCLUDES=-I./include
 
 LIBS=-Llib
 
-# include MacPorts directories for the check library
-ifeq (darwin, $(findstring darwin,$(OSTYPE)))
-CHECK_INC=-I/opt/local/include
-CHECK_LIB=-L/opt/local/lib
-endif
-CHECK_FLAGS=$(CHECK_INC) $(CHECK_LIB)
-
 TEST_FILES=test/check_holdem.c \
 	   test/check_card.c \
 	   test/check_combo.c \
@@ -45,12 +38,11 @@ OBJ_FILES=src/card.o \
 
 libholdem: $(OBJ_FILES)
 	mkdir -p lib
-	ar cr lib/libholdem.a $^
-	ranlib lib/libholdem.a
+	$(CC) -shared -o lib/libholdem.so $^
 
 # the check library requires C99
 check: $(TEST_FILES) libholdem
-	$(CC) -o test_all $(CFLAGS) --std=c99 $(INCLUDES) $(CHECK_FLAGS) $(LIBS) $(TEST_FILES) -lcheck -lholdem
+	$(CC) -o test_all $(CFLAGS) --std=c99 $(INCLUDES) $(LIBS) $(TEST_FILES) -lcheck -lholdem
 	./test_all
 
 all: libholdem check
