@@ -1,0 +1,6 @@
+#!/usr/bin/ruby -Ilib
+
+require 'ardis'
+
+dis = Ardis::Disassembler.new(ARGV[0])
+dis.disassemble $stdout

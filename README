@@ -1,0 +1,22 @@
+Ardis is an attempt at disassembling ELF files into ASM files that can be
+reassembled with GAS.
+
+Current testing environment using:
+	Ubuntu Server 12.04 (amd64)
+	gcc: version 4.6.3 (Ubuntu/Linaro 4.6.3-1ubuntu3)
+		# examples:  gcc -m32 -S file.c
+		#            gcc -m32 -c file.s
+	as: GNU assembler (GNU Binutils for Ubuntu) 2.22
+	readelf: GNU readelf (GNU Binutils for Ubuntu) 2.22
+	objdump: GNU objdump (GNU Binutils for Ubuntu) 2.22
+
+Directory structure:
+bin/
+	ardis - the executable for the Ardis disassembler
+lib/
+	the ruby library files for the Ardis disassembler (see lib/ardis/README
+	for more info)
+test/
+	(future) tests for the disassembler
+Makefile
+	run "make test" to test the disassembler

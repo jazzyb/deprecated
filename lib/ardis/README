@@ -1,0 +1,15 @@
+Files:
+-----
+disassembler.rb
+	the main class for the disassembler; reads the sections and
+	instructions using readelf and objdump and then passes this structure
+	to the Printer
+section.rb
+	wrapper class for the sections in the ELF file, e.g. .text, .rodata
+data_block.rb
+	the DataBlock class wraps the instructions and data for symbols such as
+	functions and other objects
+instruction.rb
+	handles the parsing of instructions as printed out by objdump
+printer.rb
+	parses the sections and prints them in a GAS-readable form

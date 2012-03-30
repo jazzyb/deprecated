@@ -1,0 +1,1 @@
+require 'ardis/disassembler'
