@@ -6,8 +6,13 @@ module Ardis
     end
 
     def << (instruction)
+      @curr_instruction = instruction
       @instructions ||= []
-      @instructions << instruction
+      @instructions << @curr_instruction
+    end
+
+    def append_reloc (reloc)
+      @curr_instruction.reloc = reloc
     end
 
     def each_instruction
