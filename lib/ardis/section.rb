@@ -1,5 +1,5 @@
 require 'ardis/data_block'
-require 'ardis/instruction'
+require 'ardis/instruction_factory'
 
 module Ardis
   class Section
@@ -15,7 +15,10 @@ module Ardis
     end
 
     def append_instruction (addr, bytes, cmd)
-      @curr_block << Instruction.new(self, addr, bytes, cmd)
+      i = InstructionFactory.create self, @curr_block, addr, bytes, cmd
+      @instr_addrs ||= {}
+      @instr_addrs[addr] = i
+      @curr_block << i
     end
 
     def append_reloc (reloc)
@@ -26,8 +29,18 @@ module Ardis
       @blocks.each { |b| yield b }
     end
 
+    def each_instruction
+      @blocks.each do |block|
+        block.each_instruction { |i| yield i }
+      end
+    end
+
     def executable?
       @flags && @flags.include?(:executable)
+    end
+
+    def get_instruction (addr)
+      @instr_addrs[addr]
     end
   end
 end

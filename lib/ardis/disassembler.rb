@@ -7,6 +7,7 @@ module Ardis
     def initialize (filename)
       readelf filename
       objdump filename
+      resolve_instructions
     end
 
     def disassemble (iobuf)
@@ -19,6 +20,7 @@ module Ardis
     def run_cmd (cmd, filename)
       tmp = Tempfile.new filename
       system("#{cmd} #{filename} > #{tmp.path}")
+      raise "error running command '#{cmd} #{filename}'" unless $?.success?
       tmp.each { |line| yield line.rstrip }
       tmp.close!
     end
@@ -51,10 +53,10 @@ module Ardis
     }x
 
     def process_sym (string)
-      @functions ||= {}
+      @func_type ||= {}
       if (md = SYMTAB_RE.match string)
         if md[:type] == "FUNC"
-          @functions[md[:name]] = md[:bind] == "GLOBAL" ? :global : :local
+          @func_type[md[:name]] = md[:bind] == "GLOBAL" ? :global : :local
         end
       end
     end
@@ -97,11 +99,23 @@ module Ardis
         @sections ||= []
         @sections << @curr_section
       elsif (md = DATA_BLOCK_RE.match string)
-        @curr_section.append_data_block md[:name], @functions[md[:name]]
+        @curr_section.append_data_block md[:name], @func_type[md[:name]]
       elsif (md = INSTRUCTION_RE.match string)
         @curr_section.append_instruction md[:addr], md[:bytes], md[:cmd]
       elsif (md = RELOC_RE.match string)
         @curr_section.append_reloc md[:symbol]
+      end
+    end
+
+    # this method goes through all the executable instructions and updates the
+    # 'cmd' strings to point to relative symbols rather than absolute
+    # addresses;
+    # for example:  "jmp fe4" will become "jmp .Lnew_label" and the label
+    # '.Lnew_label' will be placed at what was the address of fe4
+    def resolve_instructions
+      @sections.each do |sec|
+        next unless sec.executable?
+        sec.each_instruction { |i| i.resolve }
       end
     end
   end
