@@ -1,7 +1,7 @@
 module Ardis
   class Instruction
-    attr_accessor :reloc
-    attr_reader :bytes, :cmd, :label
+    attr_accessor :reloc, :label
+    attr_reader :bytes, :cmd
     def initialize (section, block, addr, bytes, cmd)
       @section, @block, @addr, @cmd = section, block, addr, cmd
       @bytes = bytes.split

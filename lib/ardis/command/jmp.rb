@@ -23,14 +23,14 @@ module Ardis
 
       def resolve_near_jump (jmp, addr)
         if @reloc
-          @cmd = "#{jmp}#@reloc"
+          @cmd = jmp + @reloc
         else
           i = @section.get_instruction addr
           if i.nil?
             warn "unknown address in jmp command '#{addr}: #{cmd}'"
             return
           end
-          @cmd = "#{jmp}\t#{i.get_label}"
+          @cmd = jmp + i.get_label
         end
       end
 
