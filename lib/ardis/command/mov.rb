@@ -3,9 +3,9 @@ require 'ardis/instruction'
 module Ardis
   module Command
     class Mov < Instruction
-      MOV_RELOC_RE = %r{\A(?<mov>mov\w*\s+\$)
+      MOV_RELOC_RE = %r{\A(?<mov>mov\w*\s+\$?)
                           (?<offset>0x[0-9a-f]+)
-                          (?<rest>,.*)\Z
+                          (?<rest>.*)\Z
       }x
 
       def resolve

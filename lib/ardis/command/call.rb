@@ -3,16 +3,20 @@ require 'ardis/instruction'
 module Ardis
   module Command
     class Call < Instruction
-      CALL_RE = /\Acall\s+[0-9a-f]+/
+      CALL_RE = /\A(?<call>call\s+)(?<addr>[0-9a-f]+)/
 
       def resolve
-        unless @reloc
-          warn "call command '#@addr: #@cmd' does not have reloc"
-          return
-        end
-
         if (md = CALL_RE.match @cmd)
-          @cmd = "call\t#@reloc"
+          if @reloc
+            @cmd = md[:call] + @reloc
+          else
+            i = @section.get_instruction md[:addr]
+            if i.nil?
+              warn "unknown address in call command '#@addr: #@cmd'"
+              return
+            end
+            @cmd = md[:call] + i.get_label
+          end
         else
           warn "unrecognized call command '#@addr: #@cmd'"
         end

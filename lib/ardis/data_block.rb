@@ -8,6 +8,7 @@ module Ardis
     def << (instruction)
       @curr_instruction = instruction
       @instructions ||= []
+      @curr_instruction.label = @name if @instructions.empty?
       @instructions << @curr_instruction
     end
 
@@ -18,7 +19,7 @@ module Ardis
     def generate_label
       @label_counter ||= 0
       @label_counter += 1
-      ".L#@name#@label_counter"
+      ".L#@name$#@label_counter"
     end
 
     def each_instruction
