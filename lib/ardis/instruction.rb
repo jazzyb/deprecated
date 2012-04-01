@@ -18,5 +18,12 @@ module Ardis
     def resolve
       warn "instruction '#@addr: #@cmd' has unhandled reloc" if @reloc
     end
+
+    # if the resolution of a particular instruction needs to occur after other
+    # instructions have themselves been resolved, then this method should be
+    # overwritten
+    def requires_later_resolution?
+      false
+    end
   end
 end

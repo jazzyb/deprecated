@@ -19,6 +19,10 @@ module Ardis
         end
       end
 
+      def requires_later_resolution?
+        JUMP_TABLE_RE =~ @cmd
+      end
+
       private
 
       def resolve_near_jump (jmp, addr)
