@@ -6,10 +6,10 @@ module Ardis
   class Disassembler
     def initialize (filename)
       @elf = ElfFile.new filename
-      @elf.readelf_symbols { |line| process_sym line }
+      @elf.readelf_symbols { |line| process_symbols line }
       @elf.readelf_section_headers { |line| process_flags line }
-      @elf.objdump { |line| process_asm line }
-      resolve_instructions
+      @elf.objdump { |line| process_assembly line }
+      @elf.resolve_instructions
     end
 
     def disassemble (iobuf)
@@ -29,7 +29,7 @@ module Ardis
                         (?<name>.*)\Z
     }x
 
-    def process_sym (string)
+    def process_symbols (string)
       @func_type ||= {}
       if (md = SYMTAB_RE.match string)
         if md[:type] == "FUNC"
@@ -70,7 +70,7 @@ module Ardis
     }x
     RELOC_RE = /(?<type>R_386_PC32|R_386_32)\s+(?<symbol>.*)\Z/
 
-    def process_asm (string)
+    def process_assembly (string)
       if (md = SECTION_RE.match string)
         @elf.append_section md[:name], @flags[md[:name]]
       elsif (md = DATA_BLOCK_RE.match string)
@@ -80,26 +80,6 @@ module Ardis
       elsif (md = RELOC_RE.match string)
         @elf.append_reloc md[:symbol]
       end
-    end
-
-    # this method goes through all the executable instructions and updates the
-    # 'cmd' strings to point to relative symbols rather than absolute
-    # addresses;
-    # for example:  "jmp fe4" will become "jmp .Lnew_label" and the label
-    # '.Lnew_label' will be placed at what was the address of fe4
-    def resolve_instructions
-      resolve_last = []
-      @elf.each_section do |sec|
-        next unless sec.executable?
-        sec.each_instruction do |i|
-          if i.resolve_after?
-            resolve_last << i
-            next
-          end
-          i.resolve
-        end
-      end
-      resolve_last.each { |i| i.resolve }
     end
   end
 end

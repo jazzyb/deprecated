@@ -46,6 +46,26 @@ module Ardis
       @section_names[name]
     end
 
+    # this method goes through all the executable instructions and updates the
+    # 'cmd' strings to point to relative symbols rather than absolute
+    # addresses;
+    # for example:  "jmp fe4" will become "jmp .Lnew_label" and the label
+    # '.Lnew_label' will be placed at what was the address of fe4
+    def resolve_instructions
+      resolve_last = []
+      each_section do |sec|
+        next unless sec.executable?
+        sec.each_instruction do |i|
+          if i.resolve_after?
+            resolve_last << i
+            next
+          end
+          i.resolve
+        end
+      end
+      resolve_last.each { |i| i.resolve }
+    end
+
     private
 
     def run_cmd (cmd)
