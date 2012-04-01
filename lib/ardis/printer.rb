@@ -16,6 +16,7 @@ module Ardis
 
     def print_section (sec)
       @iobuf.puts ".section #{sec.name}"
+      @iobuf.puts ".Loriginal_#{sec.name}_start:"
       sec.each_block { |b| print_data_block sec, b }
       @iobuf.puts ""
     end

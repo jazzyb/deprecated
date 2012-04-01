@@ -19,7 +19,7 @@ module Ardis
         end
       end
 
-      def requires_later_resolution?
+      def resolve_after?
         JUMP_TABLE_RE =~ @cmd
       end
 

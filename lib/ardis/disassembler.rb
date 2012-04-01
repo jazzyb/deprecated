@@ -117,7 +117,7 @@ module Ardis
       @sections.each do |sec|
         next unless sec.executable?
         sec.each_instruction do |i|
-          if i.requires_later_resolution?
+          if i.resolve_after?
             resolve_last << i
             next
           end
