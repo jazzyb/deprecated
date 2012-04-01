@@ -29,13 +29,12 @@ module Ardis
         if @reloc
           @cmd = jmp + @reloc
         else
-          blk, instr = section.get_instruction addr
+          blk, instr = section.find_address addr
           if blk.nil? || instr.nil?
             warn "unknown address in jmp command '#{addr}: #{cmd}'"
             return
           end
-          blk.create_label instr
-          @cmd = jmp + instr.label
+          @cmd = jmp + blk.create_label(instr)
         end
       end
 

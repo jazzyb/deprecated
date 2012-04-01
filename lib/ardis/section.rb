@@ -33,7 +33,8 @@ module Ardis
       @flags && @flags.include?(:executable)
     end
 
-    def get_instruction (addr)
+    # returns the block and instruction (in that order) for the given address
+    def find_address (addr)
       @instr_addrs[addr]
     end
   end

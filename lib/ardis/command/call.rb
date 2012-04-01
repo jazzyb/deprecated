@@ -10,13 +10,12 @@ module Ardis
           if @reloc
             @cmd = md[:call] + @reloc
           else
-            blk, instr = section.get_instruction md[:addr]
+            blk, instr = section.find_address md[:addr]
             if blk.nil? || instr.nil?
               warn "unknown address in call command '#@addr: #@cmd'"
               return
             end
-            blk.create_label instr
-            @cmd = md[:call] + instr.label
+            @cmd = md[:call] + blk.create_label(instr)
           end
         else
           warn "unrecognized call command '#@addr: #@cmd'"
