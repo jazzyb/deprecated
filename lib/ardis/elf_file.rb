@@ -1,4 +1,6 @@
 require 'ardis/section'
+require 'ardis/data_block'
+require 'ardis/instruction_factory'
 
 module Ardis
   class ElfFile
@@ -27,15 +29,15 @@ module Ardis
     end
 
     def append_data_block (name, type)
-      @curr_section.append_data_block name, type
+      @curr_section << DataBlock.new(name, type)
     end
 
     def append_instruction (addr, bytes, cmd)
-      @curr_section.append_instruction addr, bytes, cmd
+      @curr_section << InstructionFactory.create(addr, bytes, cmd)
     end
 
-    def append_reloc (symbol)
-      @curr_section.append_reloc symbol
+    def append_reloc (reloc)
+      @curr_section << reloc
     end
 
     def each_section

@@ -6,10 +6,9 @@ module Ardis
     end
 
     def << (instruction)
-      @curr_instruction = instruction
       @instructions ||= []
-      @curr_instruction.label = @name if @instructions.empty?
-      @instructions << @curr_instruction
+      instruction.label = @name if @instructions.empty?
+      @instructions << instruction
     end
 
     def append_reloc (reloc)
