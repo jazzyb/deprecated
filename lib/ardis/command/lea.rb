@@ -5,7 +5,7 @@ module Ardis
     class Lea < Instruction
       BAD_REG_RE = /,%eiz,1/
 
-      def resolve
+      def resolve (elf, section, block)
         @cmd.gsub! BAD_REG_RE, ''
       end
     end

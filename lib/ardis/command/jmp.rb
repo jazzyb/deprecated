@@ -9,9 +9,9 @@ module Ardis
                            (?<rest>.*)\Z
       }x
 
-      def resolve
+      def resolve (elf, section, block)
         if (md = NEAR_JUMP_RE.match @cmd)
-          resolve_near_jump md[:jmp], md[:addr]
+          resolve_near_jump section, md[:jmp], md[:addr]
         elsif (md = JUMP_TABLE_RE.match @cmd)
           resolve_jump_table md[:jmp], md[:offset], md[:rest]
         else
@@ -25,16 +25,17 @@ module Ardis
 
       private
 
-      def resolve_near_jump (jmp, addr)
+      def resolve_near_jump (section, jmp, addr)
         if @reloc
           @cmd = jmp + @reloc
         else
-          i = @section.get_instruction addr
-          if i.nil?
+          blk, instr = section.get_instruction addr
+          if blk.nil? || instr.nil?
             warn "unknown address in jmp command '#{addr}: #{cmd}'"
             return
           end
-          @cmd = jmp + i.get_label
+          blk.create_label instr
+          @cmd = jmp + instr.label
         end
       end
 

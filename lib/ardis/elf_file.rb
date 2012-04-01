@@ -19,7 +19,7 @@ module Ardis
     end
 
     def append_section (name, flags)
-      @curr_section = Section.new(self, name, flags)
+      @curr_section = Section.new(name, flags)
       @sections ||= []
       @sections << @curr_section
       @section_names ||= {}
@@ -55,15 +55,17 @@ module Ardis
       resolve_last = []
       each_section do |sec|
         next unless sec.executable?
-        sec.each_instruction do |i|
-          if i.resolve_after?
-            resolve_last << i
-            next
+        sec.each_block do |blk|
+          blk.each_instruction do |i|
+            if i.resolve_after?
+              resolve_last << [sec, blk, i]
+              next
+            end
+            i.resolve self, sec, blk
           end
-          i.resolve
         end
       end
-      resolve_last.each { |i| i.resolve }
+      resolve_last.each { |sec, blk, i| i.resolve self, sec, blk }
     end
 
     private

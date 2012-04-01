@@ -3,23 +3,22 @@ require 'ardis/instruction_factory'
 
 module Ardis
   class Section
-    attr_reader :elf
     attr_accessor :name, :flags
-    def initialize (elf, name, flags)
-      @elf, @name, @flags = elf, name, flags
+    def initialize (name, flags)
+      @name, @flags = name, flags
     end
 
     def append_data_block (name, type)
-      @curr_block = DataBlock.new(self, name, type)
+      @curr_block = DataBlock.new(name, type)
       @blocks ||= []
       @blocks << @curr_block
     end
 
     def append_instruction (addr, bytes, cmd)
-      i = InstructionFactory.create self, @curr_block, addr, bytes, cmd
+      i = InstructionFactory.create addr, bytes, cmd
       @instr_addrs ||= {}
-      @instr_addrs[addr] = i
       @curr_block << i
+      @instr_addrs[addr] = [@curr_block, i]
     end
 
     def append_reloc (reloc)
@@ -28,12 +27,6 @@ module Ardis
 
     def each_block
       @blocks.each { |b| yield b }
-    end
-
-    def each_instruction
-      @blocks.each do |block|
-        block.each_instruction { |i| yield i }
-      end
     end
 
     def executable?

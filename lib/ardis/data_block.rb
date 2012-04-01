@@ -1,8 +1,8 @@
 module Ardis
   class DataBlock
     attr_reader :name, :type
-    def initialize (section, name, type)
-      @section, @name, @type = section, name, type
+    def initialize (name, type)
+      @name, @type = name, type
     end
 
     def << (instruction)
@@ -16,10 +16,11 @@ module Ardis
       @curr_instruction.reloc = reloc
     end
 
-    def generate_label
+    def create_label (instruction)
+      return instruction.label if instruction.label
       @label_counter ||= 0
       @label_counter += 1
-      ".L#@name$#@label_counter"
+      instruction.label = ".L#@name$#@label_counter"
     end
 
     def each_instruction

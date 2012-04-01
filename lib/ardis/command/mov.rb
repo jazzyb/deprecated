@@ -8,7 +8,7 @@ module Ardis
                           (?<rest>.*)\Z
       }x
 
-      def resolve
+      def resolve (elf, section, block)
         return unless @reloc
         if (md = MOV_RELOC_RE.match @cmd)
           @cmd = md[:mov] + "(#@reloc+#{md[:offset]})" + md[:rest]
