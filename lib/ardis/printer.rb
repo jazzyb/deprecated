@@ -4,8 +4,8 @@ module Ardis
       @iobuf = iobuf
     end
 
-    def print (sections)
-      sections.each { |s| print_section s unless blacklisted? s.name }
+    def print (elf_file)
+      elf_file.each_section { |s| print_section s unless blacklisted? s.name }
     end
 
     private

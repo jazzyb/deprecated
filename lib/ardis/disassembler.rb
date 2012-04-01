@@ -1,46 +1,23 @@
+require 'ardis/elf_file'
 require 'ardis/printer'
-require 'ardis/section'
 require 'tempfile'
 
 module Ardis
   class Disassembler
     def initialize (filename)
-      readelf filename
-      objdump filename
+      @elf = ElfFile.new filename
+      @elf.readelf_symbols { |line| process_sym line }
+      @elf.readelf_section_headers { |line| process_flags line }
+      @elf.objdump { |line| process_asm line }
       resolve_instructions
     end
 
     def disassemble (iobuf)
       p = Printer.new iobuf
-      p.print @sections
+      p.print @elf
     end
 
     private
-
-    def run_cmd (cmd, filename)
-      tmp = Tempfile.new filename
-      system("#{cmd} #{filename} > #{tmp.path}")
-      raise "error running command '#{cmd} #{filename}'" unless $?.success?
-      tmp.each { |line| yield line.rstrip }
-      tmp.close!
-    end
-
-    def readelf (filename)
-      readelf_symbols filename
-      readelf_section_headers filename
-    end
-
-    def readelf_symbols (filename)
-      run_cmd("readelf -s", filename) { |line| process_sym line }
-    end
-
-    def readelf_section_headers (filename)
-      run_cmd("readelf -S", filename) { |line| process_flags line }
-    end
-
-    def objdump (filename)
-      run_cmd("objdump -Drz", filename) { |line| process_asm line }
-    end
 
     SYMTAB_RE = %r{\A\s+(?<num>\d+):\s+
                         (?<value>[0-9a-f]+)\s+
@@ -95,15 +72,13 @@ module Ardis
 
     def process_asm (string)
       if (md = SECTION_RE.match string)
-        @curr_section = Section.new(md[:name], @flags[md[:name]])
-        @sections ||= []
-        @sections << @curr_section
+        @elf.append_section md[:name], @flags[md[:name]]
       elsif (md = DATA_BLOCK_RE.match string)
-        @curr_section.append_data_block md[:name], @func_type[md[:name]]
+        @elf.append_data_block md[:name], @func_type[md[:name]]
       elsif (md = INSTRUCTION_RE.match string)
-        @curr_section.append_instruction md[:addr], md[:bytes], md[:cmd]
+        @elf.append_instruction md[:addr], md[:bytes], md[:cmd]
       elsif (md = RELOC_RE.match string)
-        @curr_section.append_reloc md[:symbol]
+        @elf.append_reloc md[:symbol]
       end
     end
 
@@ -114,7 +89,7 @@ module Ardis
     # '.Lnew_label' will be placed at what was the address of fe4
     def resolve_instructions
       resolve_last = []
-      @sections.each do |sec|
+      @elf.each_section do |sec|
         next unless sec.executable?
         sec.each_instruction do |i|
           if i.resolve_after?

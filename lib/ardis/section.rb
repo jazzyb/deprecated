@@ -3,9 +3,10 @@ require 'ardis/instruction_factory'
 
 module Ardis
   class Section
+    attr_reader :elf
     attr_accessor :name, :flags
-    def initialize (name, flags)
-      @name, @flags = name, flags
+    def initialize (elf, name, flags)
+      @elf, @name, @flags = elf, name, flags
     end
 
     def append_data_block (name, type)
