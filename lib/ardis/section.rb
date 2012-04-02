@@ -3,6 +3,11 @@ require 'ardis/instruction'
 
 module Ardis
   class Section
+    # create the label that marks the start of the original section
+    def self.origin_label (name)
+      ".Lorginal_#{name}_start"
+    end
+
     attr_accessor :name, :flags
     def initialize (name, flags)
       @name, @flags = name, flags

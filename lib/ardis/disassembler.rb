@@ -1,5 +1,6 @@
 require 'ardis/elf_file'
 require 'ardis/printer'
+require 'ardis/section'
 require 'tempfile'
 
 module Ardis
@@ -7,7 +8,7 @@ module Ardis
     def initialize (filename)
       @elf = ElfFile.new filename
       @elf.readelf_symbols { |line| process_symbols line }
-      @elf.readelf_section_headers { |line| process_flags line }
+      @elf.readelf_section_headers { |line| process_sections line }
       @elf.objdump { |line| process_assembly line }
       @elf.resolve_instructions
     end
@@ -52,9 +53,11 @@ module Ardis
                         (?<al>\d+)\Z
     }x
 
-    def process_flags (string)
+    def process_sections (string)
+      @section_names ||= []
       @flags ||= {}
       if (md = SECTION_HDR_RE.match string)
+        @section_names << md[:name]
         if (md[:flags].include? 'X')
           @flags[md[:name]] ||= []
           @flags[md[:name]] << :executable
@@ -78,7 +81,12 @@ module Ardis
       elsif (md = INSTRUCTION_RE.match string)
         @elf.append_instruction md[:addr], md[:bytes], md[:cmd]
       elsif (md = RELOC_RE.match string)
-        @elf.append_reloc md[:symbol]
+        if @section_names.include? md[:symbol]
+          reloc = Section.origin_label md[:symbol]
+        else
+          reloc = md[:symbol]
+        end
+        @elf.append_reloc reloc
       end
     end
   end

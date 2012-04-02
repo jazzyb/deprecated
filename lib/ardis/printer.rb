@@ -1,3 +1,5 @@
+require 'ardis/section'
+
 module Ardis
   class Printer
     def initialize (iobuf=$stdout)
@@ -16,7 +18,7 @@ module Ardis
 
     def print_section (sec)
       @iobuf.puts ".section #{sec.name}"
-      @iobuf.puts ".Loriginal_#{sec.name}_start:"
+      @iobuf.puts Section.origin_label(sec.name) + ":"
       sec.each_block { |b| print_data_block sec, b }
       @iobuf.puts ""
     end
