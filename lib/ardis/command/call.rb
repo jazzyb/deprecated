@@ -15,7 +15,7 @@ module Ardis
               warn "unknown address in call command '#@addr: #@cmd'"
               return
             end
-            @cmd = md[:call] + blk.create_label(instr)
+            @cmd = md[:call] + blk.create_label(self, instr)
           end
         else
           warn "unrecognized call command '#@addr: #@cmd'"

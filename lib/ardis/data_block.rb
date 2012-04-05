@@ -15,11 +15,18 @@ module Ardis
       @curr_instruction.reloc = reloc
     end
 
-    def create_label (instruction)
-      return instruction.label if instruction.label
+    # 'from' is the jmp or call instruction and 'to' is the instruction we are
+    # jmping/calling to; sets and returns a unique relative label for the 'to'
+    # instruction
+    def create_label (from, to)
+      @jump_map ||= {}
+      @jump_map[to] ||= []
+      @jump_map[to] << from
+      return to.label if to.label
+
       @label_counter ||= 0
       @label_counter += 1
-      instruction.label = ".L#@name$#@label_counter"
+      to.label = ".L#@name$#@label_counter"
     end
 
     def each_instruction

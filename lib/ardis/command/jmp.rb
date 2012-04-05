@@ -34,7 +34,7 @@ module Ardis
             warn "unknown address in jmp command '#{addr}: #{cmd}'"
             return
           end
-          @cmd = jmp + blk.create_label(instr)
+          @cmd = jmp + blk.create_label(self, instr)
         end
       end
 
