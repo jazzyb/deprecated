@@ -5,7 +5,15 @@ module Ardis
   class Section
     # create the label that marks the start of the original section
     def self.origin_label (name)
-      ".Lorginal_#{name}_start"
+      ".Loriginal_#{name}_start"
+    end
+
+    def self.name (origin_label)
+      if (md = /\A\.Loriginal_(?<name>.*)_start\Z/.match origin_label)
+        md[:name]
+      else
+        nil
+      end
     end
 
     attr_accessor :name, :flags
@@ -36,6 +44,27 @@ module Ardis
     # returns the block and instruction (in that order) for the given address
     def find_address (addr)
       @instr_addrs[addr]
+    end
+
+    # TODO: the "long" needs to be converted to and returned as a legitimate
+    # integer value
+    def get_long (offset)
+      count = 0
+      long_size = 4
+      ret = []
+      each_block do |block|
+        block.each_instruction do |i|
+          i.bytes.each do |byte|
+            count += 1
+            if count > offset
+              ret << byte
+              long_size -= 1
+              return ret if long_size == 0
+            end
+          end
+        end
+      end
+      nil
     end
 
     private

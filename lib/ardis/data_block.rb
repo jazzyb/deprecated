@@ -7,7 +7,9 @@ module Ardis
 
     def << (instruction)
       @instructions ||= []
+      @instr_indices ||= {}
       instruction.label = @name if @instructions.empty?
+      @instr_indices[instruction] = @instructions.size
       @instructions << instruction
     end
 
@@ -31,6 +33,17 @@ module Ardis
 
     def each_instruction
       @instructions.each { |i| yield i }
+    end
+
+    def prev_instruction (instruction)
+      return nil if @instructions.nil? || @instr_indices.nil?
+      idx = @instr_indices[instruction]
+      return nil if idx.nil? || idx == 0
+      @instructions[idx - 1]
+    end
+
+    def find_jmp (instruction)
+      @jump_map[instruction] || []
     end
   end
 end

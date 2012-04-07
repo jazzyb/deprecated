@@ -18,5 +18,16 @@ module Ardis
     def resolve_after?
       false
     end
+
+    # this method missing allows us to easily check the type of the
+    # instruction, e.g. is_call?, is_movl?, is_jbe?
+    def method_missing (func, *args, &block)
+      instruction_re = /\Ais_(?<cmd>.*)\?\Z/
+      if (md = instruction_re.match func)
+        @cmd.index(md[:cmd]) == 0
+      else
+        raise NoMethodError, "undefined method `#{func}' for #{self.to_s}:#{self.class}"
+      end
+    end
   end
 end
