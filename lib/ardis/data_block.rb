@@ -31,6 +31,12 @@ module Ardis
       to.label = ".L#@name$#@label_counter"
     end
 
+    def create_jump_table_label
+      @jmptbl_counter ||= 0
+      @jmptbl_counter += 1
+      ".L#{@name}_jmptbl$#@jmptbl_counter"
+    end
+
     def each_instruction
       @instructions.each { |i| yield i }
     end

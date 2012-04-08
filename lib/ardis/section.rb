@@ -46,8 +46,8 @@ module Ardis
       @instr_addrs[addr]
     end
 
-    # TODO: the "long" needs to be converted to and returned as a legitimate
-    # integer value
+    # returns the long (4-byte) value at the given offset encoded as a hex
+    # string
     def get_long (offset)
       count = 0
       long_size = 4
@@ -59,7 +59,7 @@ module Ardis
             if count > offset
               ret << byte
               long_size -= 1
-              return ret if long_size == 0
+              return ret.reverse.join.sub(/\A0*/, '') if long_size == 0
             end
           end
         end

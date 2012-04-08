@@ -1,4 +1,5 @@
 require 'ardis/instruction'
+require 'ardis/jump_table'
 
 module Ardis
   module Command
@@ -13,8 +14,8 @@ module Ardis
         if (md = NEAR_JUMP_RE.match @cmd)
           resolve_near_jump section, md[:jmp], md[:addr]
         elsif (md = JUMP_TABLE_RE.match @cmd)
-          resolve_jump_table md[:jmp], md[:offset], md[:rest], elf, section,
-            block
+          resolve_jump_table md[:jmp], md[:offset].to_i(16), md[:rest], elf,
+            section, block
         else
           warn "unrecognized jmp command '#@addr: #@cmd'"
         end
@@ -50,17 +51,8 @@ module Ardis
           warn "jmp reloc '#@reloc' is not a section '#@addr: #@cmd'"
           return
         end
-
-        # TODO: create a jump table class or something that the printer can
-        # output when it gets to this jmp
-        puts ".section #{label.name}"
-        puts ".align 4"
-        puts ".L<new_jump_table_label>:"
-        tblsz.times do |idx|
-          long = label.get_long(4 * idx + offset.to_i(16))
-          puts ".long #{long}"
-        end
-        puts ".text"
+        @jmptbl = JumpTable.new(section, label, block, self, offset, tblsz)
+        @cmd = jmp + @jmptbl.name + rest
       end
 
       # find the cmp instruction and return the size that refers to the jump
