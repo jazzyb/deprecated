@@ -16,7 +16,10 @@ poker: test/holdem/src/main.c card.o combo.o deck.o hand.o
 	$(ARDIS) $@.orig > $$(echo $@ | sed 's/\.o$$/.s/')
 	$(CC) -m32 -c -o $@ $$(echo $@ | sed 's/\.o$$/.s/')
 
+bundle:
+	git bundle create repo.bundle master
+
 clean:
-	rm -rf *.o *.orig *.s poker a.out
+	rm -rf *.o *.orig *.s poker a.out *.bundle
 
 .PHONY: test
