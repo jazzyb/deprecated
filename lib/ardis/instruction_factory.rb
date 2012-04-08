@@ -2,6 +2,7 @@ require 'ardis/command/call'
 require 'ardis/command/jmp'
 require 'ardis/command/lea'
 require 'ardis/command/mov'
+require 'ardis/command/rep'
 require 'ardis/instruction'
 
 module Ardis
@@ -17,6 +18,8 @@ module Ardis
         Command::Lea.new(*args)
       when /\Amov/
         Command::Mov.new(*args)
+      when /\Arep/
+        Command::Rep.new(*args)
       else
         Instruction.new(*args)
       end
