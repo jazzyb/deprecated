@@ -9,11 +9,11 @@ module Ardis
     end
 
     def readelf_symbols
-      run_cmd("readelf -s") { |line| yield line }
+      run_cmd("readelf -Ws") { |line| yield line }
     end
 
     def readelf_section_headers
-      run_cmd("readelf -S") { |line| yield line }
+      run_cmd("readelf -WS") { |line| yield line }
     end
 
     def objdump
