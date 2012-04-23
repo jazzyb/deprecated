@@ -1,0 +1,6 @@
+#!/usr/bin/ruby -Ilib
+
+require 'git_fuzz'
+
+git = GitFuzz::Fuzzer.new 'repo'
+git.fuzz ARGV[0].to_i

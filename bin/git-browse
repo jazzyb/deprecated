@@ -1,0 +1,8 @@
+#!/usr/bin/ruby -Ilib
+
+require 'noya/git'
+
+if __FILE__ == $0
+  git = Noya::Git::Repository.new(ARGV[0])
+  git.each_object { |o| puts "#{o.sha} : #{o.contents}" }
+end
