@@ -1,4 +1,5 @@
 CC=gcc
+INTERP=/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
 
 ifeq ($(DEBUG), 1)
 CFLAGS=-g -O0
@@ -34,7 +35,7 @@ OBJ_FILES=src/card.o \
 	  src/hand.o
 
 %.o: %.c $(INC_FILES)
-	$(CC) -c -o $@ $(CFLAGS) $(WARN_FLAGS) $(INCLUDES) $<
+	$(CC) -c -o $@ $(CFLAGS) -fPIC $(WARN_FLAGS) $(INCLUDES) $<
 
 libholdem: $(OBJ_FILES)
 	mkdir -p lib
@@ -43,7 +44,7 @@ libholdem: $(OBJ_FILES)
 # the check library requires C99
 check: $(TEST_FILES) libholdem
 	$(CC) -o test_all $(CFLAGS) --std=c99 $(INCLUDES) $(LIBS) $(TEST_FILES) -lcheck -lholdem
-	./test_all
+	$(INTERP) --library-path lib/ ./test_all
 
 all: libholdem check
 
