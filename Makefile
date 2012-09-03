@@ -9,7 +9,7 @@ all: calypso
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-calypso: ext/main.o
+calypso: ext/main.o ext/calypso.o
 	$(CC) -o $@ $^ $(LIBS)
 
 check:
