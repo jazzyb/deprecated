@@ -27,7 +27,7 @@ module Calypso
 
     def open (path)
       $log.debug { "Calypso::FS: open() called" }
-      @files.has_key? path ? true : nil
+      @files.has_key?(path) ? true : nil
     end
 
     def read (path, size, offset)
