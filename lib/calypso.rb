@@ -1,7 +1,4 @@
-require 'logger'
-$log = Logger.new("/tmp/fuse-test.txt")
-$log.level = Logger::DEBUG
-
 module Calypso
-  autoload :FS, 'calypso/fs'
+  autoload :FS,     'calypso/fs'
+  autoload :Logger, 'calypso/logger'
 end

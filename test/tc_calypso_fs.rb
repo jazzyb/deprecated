@@ -1,5 +1,4 @@
 require 'calypso'
-require 'logger'
 require 'test/unit'
 
 module Calypso
@@ -11,7 +10,7 @@ module Calypso
   end
 end
 
-$log.level = Logger::INFO
+Calypso::Logger.level = Calypso::Logger::INFO # turn off logging
 
 class TestFS < Test::Unit::TestCase
   def setup

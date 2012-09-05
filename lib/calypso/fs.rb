@@ -1,3 +1,5 @@
+require 'calypso/logger'
+
 module Calypso
   class FS
     def initialize
@@ -5,33 +7,33 @@ module Calypso
     end
 
     def get_size (path)
-      $log.debug { "Calypso::FS: size() called" }
+      Logger.debug { "Calypso::FS: get_size() called" }
       return nil unless @files.has_key? path
       @files[path].size
     end
 
     def readdir (path)
-      $log.debug { "Calypso::FS: readdir() called" }
+      Logger.debug { "Calypso::FS: readdir() called" }
       @files.keys.map { |filename| filename.sub('/', '') }
     end
 
     def create (path)
-      $log.debug { "Calypso::FS: create() called" }
+      Logger.debug { "Calypso::FS: create() called" }
       @files[path] = ""
     end
 
     def open (path)
-      $log.debug { "Calypso::FS: open() called" }
+      Logger.debug { "Calypso::FS: open() called" }
       @files.has_key?(path) ? true : nil
     end
 
     def read (path, size, offset)
-      $log.debug { "Calypso::FS: read() called" }
+      Logger.debug { "Calypso::FS: read() called" }
       @files[path][offset...(offset+size)]
     end
 
     def write (path, buf, size, offset)
-      $log.debug { "Calypso::FS: write() called" }
+      Logger.debug { "Calypso::FS: write() called" }
       @files[path].insert(offset, buf)
       size
     end
