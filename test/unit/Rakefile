@@ -4,5 +4,5 @@ task :default => 'test'
 
 Rake::TestTask.new 'test' do |t|
   t.libs = ['lib']
-  t.test_files = FileList['test/tc_*.rb']
+  t.test_files = FileList['test/unit/tc_*.rb']
 end

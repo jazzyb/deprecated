@@ -13,7 +13,7 @@ calypso: ext/main.o ext/calypso.o
 	$(CC) -o $@ $^ $(LIBS)
 
 check:
-	rake -f test/Rakefile
+	rake -f test/unit/Rakefile
 
 clean:
 	rm -rf calypso ext/*.o
