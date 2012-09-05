@@ -5,6 +5,7 @@
 #include <ruby.h>
 
 #include "calypso.h"
+#include "rb_catch.h"
 
 
 static void load_cwd_lib (void)
@@ -18,9 +19,9 @@ static void init_ruby_vm (void)
 	ruby_init();
 	load_cwd_lib(); /* TODO remove this once we can install with gem */
 	ruby_init_loadpath();
-	rb_require("calypso");
-	Calypso = rb_const_get(rb_cObject, rb_intern("Calypso"));
-	Calypso_FS = rb_const_get(Calypso, rb_intern("FS"));
+	RB_CATCH( rb_require, "calypso" );
+	Calypso = RB_CATCH( rb_const_get, rb_cObject, rb_intern("Calypso") );
+	Calypso_FS = RB_CATCH( rb_const_get, Calypso, rb_intern("FS") );
 }
 
 int main (int argc, char **argv)

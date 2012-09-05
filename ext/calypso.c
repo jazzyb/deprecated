@@ -4,14 +4,17 @@
 #include <ruby.h>
 
 #include "calypso.h"
+#include "rb_catch.h"
 
 
 VALUE Calypso, Calypso_FS;
 
-#define GET_CALYPSO_FS_REF() rb_funcall(Calypso_FS, rb_intern("instance"), 0)
+#define GET_CALYPSO_FS_REF() \
+	RB_CATCH( rb_funcall, Calypso_FS, rb_intern("instance"), 0 )
 
 #define CFS_METHOD(func, ...) \
-	rb_funcall(GET_CALYPSO_FS_REF(), rb_intern( #func ), __VA_ARGS__)
+	RB_CATCH( rb_funcall, GET_CALYPSO_FS_REF(), rb_intern( #func ), \
+			__VA_ARGS__ )
 
 
 int calypso_getattr (const char *path, struct stat *stbuf)
