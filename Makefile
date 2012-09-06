@@ -12,8 +12,17 @@ all: calypso
 calypso: ext/main.o ext/calypso.o
 	$(CC) -o $@ $^ $(LIBS)
 
-check:
-	rake -f test/unit/Rakefile
+system-test: calypso
+	@echo -------------------------
+	@echo SYSTEM TESTING
+	@test/system/tc_read_write.sh
+
+unit-test:
+	@echo -------------------------
+	@echo UNIT TESTING
+	@rake -f test/unit/Rakefile
+
+check: unit-test system-test
 
 clean:
 	rm -rf calypso ext/*.o
