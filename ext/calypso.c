@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fuse.h>
 #include <ruby.h>
+#include <unistd.h>
 
 #include "calypso.h"
 #include "rb_catch.h"
@@ -22,8 +23,11 @@ int calypso_getattr (const char *path, struct stat *stbuf)
 	VALUE size;
 
 	memset(stbuf, 0, sizeof(*stbuf));
+	stbuf->st_uid = getuid();
+	stbuf->st_gid = getgid();
+
 	if (strcmp(path, "/") == 0) {
-		stbuf->st_mode = S_IFDIR | 0755;
+		stbuf->st_mode = S_IFDIR | 0700;
 		stbuf->st_nlink = 2;
 
 	} else {
@@ -32,7 +36,7 @@ int calypso_getattr (const char *path, struct stat *stbuf)
 			return -ENOENT;
 		}
 		stbuf->st_size = FIX2INT(size);
-		stbuf->st_mode = S_IFREG | 0644;
+		stbuf->st_mode = S_IFREG | 0600;
 		stbuf->st_nlink = 1;
 	}
 	return 0;
@@ -93,7 +97,34 @@ int calypso_write (const char *path, const char *buf, size_t size, off_t offset,
 	return FIX2INT(ret);
 }
 
+int calypso_truncate (const char *path, off_t offset)
+{
+	VALUE ret;
+
+	ret = CFS_METHOD(truncate, 2, rb_str_new_cstr(path), INT2NUM(offset));
+
+	return FIX2INT(ret);
+}
+
+/*
+ * Currently, the remaining functions in this source file only exist to quiet
+ * typical command-line tools from printing errors about functions not being
+ * supported.  I am not sure if supporting the following functionality is even
+ * necessary for my purposes.
+ */
 int calypso_utimens (const char *path, const struct timespec tv[2])
+{
+	/* TODO */
+	return 0;
+}
+
+int calypso_chown (const char *path, uid_t uid, gid_t gid)
+{
+	/* TODO */
+	return 0;
+}
+
+int calypso_chmod (const char *path, mode_t mode)
 {
 	/* TODO */
 	return 0;

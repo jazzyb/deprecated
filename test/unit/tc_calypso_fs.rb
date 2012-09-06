@@ -69,4 +69,19 @@ class TestFS < Test::Unit::TestCase
     @fs.write file, "888", 3, 0
     assert_equal("888abcdefghijklmnopqrstuvwxyz888", @fs.files[file])
   end
+
+  def test_truncate
+    file = "/hello"
+    @fs.files = {file => "abcdefghijklmnopqrstuvwxyz"}
+    assert_equal(0, @fs.truncate(file, 10))
+    assert_equal("abcdefghij", @fs.files[file])
+    @fs.truncate file, 100
+    assert_equal("abcdefghij", @fs.files[file])
+    @fs.truncate file, 0
+    assert_equal("", @fs.files[file])
+
+    @fs.files = {file => "abcdefghij"}
+    assert_equal(1, @fs.truncate(file, -1))
+    assert_equal("abcdefghij", @fs.files[file])
+  end
 end

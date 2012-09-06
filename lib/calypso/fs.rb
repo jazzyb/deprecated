@@ -38,6 +38,13 @@ module Calypso
       size
     end
 
+    def truncate (path, offset)
+      Logger.debug { "Calypso::FS: truncate() called" }
+      return 1 if offset < 0
+      @files[path] = @files[path][0...offset]
+      0
+    end
+
     # Singleton implementation:
     #
     # We are rolling our own singleton pattern below instead of using the built-in

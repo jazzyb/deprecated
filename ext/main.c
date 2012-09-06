@@ -40,7 +40,10 @@ int main (int argc, char **argv)
 		.open = calypso_open,
 		.read = calypso_read,
 		.write = calypso_write,
+		.truncate = calypso_truncate,
 		.utimens = calypso_utimens,
+		.chown = calypso_chown,
+		.chmod = calypso_chmod,
 	};
 
 	init_logging(argv[0]);

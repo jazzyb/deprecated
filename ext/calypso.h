@@ -15,6 +15,9 @@ int calypso_read (const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi);
 int calypso_write (const char *path, const char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi);
+int calypso_truncate (const char *path, off_t offset);
 int calypso_utimens (const char *path, const struct timespec tv[2]);
+int calypso_chown (const char *path, uid_t uid, gid_t gid);
+int calypso_chmod (const char *path, mode_t mode);
 
 #endif

@@ -44,6 +44,17 @@ while [ true ]; do
 		break
 	fi
 
+	# Verify that we can also overwrite files.
+	echo -n "" > $MOUNT/hello
+	if [ "$(ls -l $MOUNT/hello | awk '{ print $5 }')" != "0" ]; then
+		echo $TEST-7: $FAILURE
+		break
+	fi
+	if [ "$(cat $MOUNT/hello)" != "" ]; then
+		echo $TEST-8: $FAILURE
+		break
+	fi
+
 	echo $TEST: $SUCCESS
 	break
 done
