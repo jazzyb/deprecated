@@ -106,6 +106,17 @@ int calypso_truncate (const char *path, off_t offset)
 	return FIX2INT(ret);
 }
 
+int calypso_unlink (const char *path)
+{
+	VALUE ret;
+
+	ret = CFS_METHOD(unlink, 1, rb_str_new_cstr(path));
+	if (NIL_P(ret)) {
+		return -ENOENT;
+	}
+	return 0;
+}
+
 /*
  * Currently, the remaining functions in this source file only exist to quiet
  * typical command-line tools from printing errors about functions not being

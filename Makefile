@@ -15,7 +15,7 @@ calypso: ext/main.o ext/calypso.o
 system-test: calypso
 	@echo -------------------------
 	@echo SYSTEM TESTING
-	@test/system/tc_read_write.sh
+	@test/system/test_all.sh
 
 unit-test:
 	@echo -------------------------

@@ -84,4 +84,13 @@ class TestFS < Test::Unit::TestCase
     assert_equal(1, @fs.truncate(file, -1))
     assert_equal("abcdefghij", @fs.files[file])
   end
+
+  def test_unlink
+    file = "/hello"
+    @fs.files = {file => "", :file2 => ""}
+    assert_nil(@fs.unlink "file3")
+    assert_not_nil(@fs.unlink file)
+    assert_nil(@fs.unlink file)
+    assert_equal({:file2 => ""}, @fs.files)
+  end
 end

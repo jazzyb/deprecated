@@ -45,6 +45,12 @@ module Calypso
       0
     end
 
+    def unlink (path)
+      Logger.debug { "Calypso::FS: unlink() called" }
+      return nil unless @files.has_key?(path)
+      @files.delete path
+    end
+
     # Singleton implementation:
     #
     # We are rolling our own singleton pattern below instead of using the built-in

@@ -41,6 +41,7 @@ int main (int argc, char **argv)
 		.read = calypso_read,
 		.write = calypso_write,
 		.truncate = calypso_truncate,
+		.unlink = calypso_unlink,
 		.utimens = calypso_utimens,
 		.chown = calypso_chown,
 		.chmod = calypso_chmod,
