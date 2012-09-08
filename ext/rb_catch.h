@@ -7,6 +7,9 @@
 #include <syslog.h>
 
 /*
+ * WARNING: Due to the use of nested C functions, this macro is unlikely to
+ * compile with anything other than GCC.
+ *
  * The RB_CATCH() macro wraps calls to the ruby VM libraries in order to handle
  * any uncaught exceptions.  The code will log the uncaught exception and then
  * force an exit with a return value of 1.  If calling the ruby function

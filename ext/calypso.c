@@ -20,25 +20,40 @@ VALUE Calypso, Calypso_FS;
 
 int calypso_getattr (const char *path, struct stat *stbuf)
 {
-	VALUE size;
+	VALUE attrs, val;
 
 	memset(stbuf, 0, sizeof(*stbuf));
-	stbuf->st_uid = getuid();
-	stbuf->st_gid = getgid();
-
 	if (strcmp(path, "/") == 0) {
-		stbuf->st_mode = S_IFDIR | 0700;
+		/* FIXME give bullshit answers for top level */
+		stbuf->st_uid = getuid();
+		stbuf->st_gid = getgid();
+		stbuf->st_mode = S_IFDIR | 0711;
 		stbuf->st_nlink = 2;
-
-	} else {
-		size = CFS_METHOD(get_size, 1, rb_str_new_cstr(path));
-		if (NIL_P(size)) {
-			return -ENOENT;
-		}
-		stbuf->st_size = FIX2INT(size);
-		stbuf->st_mode = S_IFREG | 0600;
-		stbuf->st_nlink = 1;
+		return 0;
 	}
+
+	attrs = CFS_METHOD(getattr, 1, rb_str_new_cstr(path));
+	if (NIL_P(attrs)) {
+		return -ENOENT;
+	}
+	/* user id */
+	val = RB_CATCH( rb_funcall, attrs, rb_intern("uid"), 0 );
+	stbuf->st_uid = FIX2INT(val);
+	/* group id */
+	val = RB_CATCH( rb_funcall, attrs, rb_intern("gid"), 0 );
+	stbuf->st_gid = FIX2INT(val);
+	/* file permissions */
+	val = RB_CATCH( rb_funcall, attrs, rb_intern("mode"), 0 );
+	stbuf->st_mode = S_IFREG | FIX2INT(val);
+	/* modified times */
+	val = RB_CATCH( rb_funcall, attrs, rb_intern("mtime"), 0 );
+	stbuf->st_atime = stbuf->st_ctime = stbuf->st_mtime = NUM2INT(val);
+	/* file size */
+	val = RB_CATCH( rb_funcall, attrs, rb_intern("contents"), 0 );
+	val = RB_CATCH( rb_funcall, val, rb_intern("size"), 0 );
+	stbuf->st_size = NUM2INT(val);
+
+	stbuf->st_nlink = 1;
 	return 0;
 }
 
@@ -117,26 +132,25 @@ int calypso_unlink (const char *path)
 	return 0;
 }
 
-/*
- * Currently, the remaining functions in this source file only exist to quiet
- * typical command-line tools from printing errors about functions not being
- * supported.  I am not sure if supporting the following functionality is even
- * necessary for my purposes.
- */
 int calypso_utimens (const char *path, const struct timespec tv[2])
 {
-	/* TODO */
+	if (tv == NULL || tv[1].tv_nsec == UTIME_NOW) {
+		CFS_METHOD(utime, 1, rb_str_new_cstr(path));
+	} else {
+		CFS_METHOD(utime, 2, rb_str_new_cstr(path),
+				INT2NUM(tv[0].tv_sec));
+	}
 	return 0;
 }
 
 int calypso_chown (const char *path, uid_t uid, gid_t gid)
 {
-	/* TODO */
+	CFS_METHOD(chown, 3, rb_str_new_cstr(path), INT2FIX(uid), INT2FIX(gid));
 	return 0;
 }
 
 int calypso_chmod (const char *path, mode_t mode)
 {
-	/* TODO */
+	CFS_METHOD(chmod, 2, rb_str_new_cstr(path), INT2FIX(mode));
 	return 0;
 }
