@@ -49,8 +49,7 @@ int calypso_getattr (const char *path, struct stat *stbuf)
 	val = RB_CATCH( rb_funcall, attrs, rb_intern("mtime"), 0 );
 	stbuf->st_atime = stbuf->st_ctime = stbuf->st_mtime = NUM2INT(val);
 	/* file size */
-	val = RB_CATCH( rb_funcall, attrs, rb_intern("contents"), 0 );
-	val = RB_CATCH( rb_funcall, val, rb_intern("size"), 0 );
+	val = CFS_METHOD(get_size, 1, rb_str_new_cstr(path));
 	stbuf->st_size = NUM2INT(val);
 
 	stbuf->st_nlink = 1;
@@ -75,7 +74,7 @@ int calypso_readdir (const char *path, void *buf, fuse_fill_dir_t filler,
 
 int calypso_create (const char *path, mode_t mode, struct fuse_file_info *fi)
 {
-	CFS_METHOD(create, 1, rb_str_new_cstr(path));
+	CFS_METHOD(create, 2, rb_str_new_cstr(path), INT2FIX(mode));
 	return 0;
 }
 

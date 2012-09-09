@@ -3,9 +3,23 @@ require 'test/unit'
 
 module Calypso
   class FS
-    attr_accessor :files
+    attr_accessor :files, :attrs
     def self.reset
       @@_instance.files = {}
+      @@_instance.attrs = {}
+    end
+
+    # 'hash' is a mapping of filename => [contents, args]
+    def preset (hash)
+      FS.reset
+      hash.each do |name, arr|
+        @files[name] = FileStore.new(name, arr[0])
+        if arr.size == 2
+          @attrs[name] = FileAttr.new(name, arr[1])
+        else
+          @attrs[name] = FileAttr.new(name)
+        end
+      end
     end
   end
 end
@@ -30,8 +44,8 @@ class TestFS < Test::Unit::TestCase
       :gid => 89,
       :mode => 1001
     }
-    @fs.files = {file => Calypso::FileAttr.new("jjjjj", args)}
-    assert_equal("jjjjj", @fs.getattr(file).contents)
+    @fs.preset({file => ["jjjjj", args]})
+    assert_equal(5, @fs.get_size(file))
     assert_equal(args[:mtime], @fs.getattr(file).mtime)
     assert_equal(args[:mode], @fs.getattr(file).mode)
     assert_equal(args[:uid], @fs.getattr(file).uid)
@@ -39,9 +53,9 @@ class TestFS < Test::Unit::TestCase
   end
 
   def test_readdir
-    @fs.files = { '/foo' => Calypso::FileAttr.new(''),
-                  '/bar' => Calypso::FileAttr.new(''),
-                  '/baz' => Calypso::FileAttr.new('') }
+    @fs.preset({ '/foo' => [''],
+                 '/bar' => [''],
+                 '/baz' => [''] })
     assert_equal(['bar', 'baz', 'foo'],
                  @fs.readdir('/').sort)
   end
@@ -49,20 +63,20 @@ class TestFS < Test::Unit::TestCase
   def test_create
     file = "/hello"
     @fs.create file
-    assert(@fs.files.has_key? file)
-    assert_equal(0, @fs.files[file].contents.size)
+    assert(@fs.attrs.has_key? file)
+    assert_equal(0, @fs.files[file].size)
   end
 
   def test_open
     file = "/hello"
     assert_nil(@fs.open file)
-    @fs.files = {file => Calypso::FileAttr.new("jjjjj")}
+    @fs.preset({file => ["jjjjj"]})
     assert(@fs.open file)
   end
 
   def test_read
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new("abcdefghijklmnopqrstuvwxyz")}
+    @fs.preset({file => ["abcdefghijklmnopqrstuvwxyz"]})
     assert_equal("abcdefghij", @fs.read(file, 10, 0))
     assert_equal("stu", @fs.read(file, 3, 18))
     assert_equal("z", @fs.read(file, 100, 25))
@@ -70,65 +84,65 @@ class TestFS < Test::Unit::TestCase
 
   def test_write
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new("abcdefghijklmnopqrstuvwxyz")}
+    @fs.preset({file => ["abcdefghijklmnopqrstuvwxyz"]})
     @fs.write file, "888", 3, 10
-    assert_equal("abcdefghij888klmnopqrstuvwxyz", @fs.files[file].contents)
-    @fs.files = {file => Calypso::FileAttr.new("abcdefghijklmnopqrstuvwxyz")}
+    assert_equal("abcdefghij888klmnopqrstuvwxyz", @fs.files[file].read)
+    @fs.preset({file => ["abcdefghijklmnopqrstuvwxyz"]})
     @fs.write file, "888", 3, 26
-    assert_equal("abcdefghijklmnopqrstuvwxyz888", @fs.files[file].contents)
+    assert_equal("abcdefghijklmnopqrstuvwxyz888", @fs.files[file].read)
     @fs.write file, "888", 3, 0
-    assert_equal("888abcdefghijklmnopqrstuvwxyz888", @fs.files[file].contents)
+    assert_equal("888abcdefghijklmnopqrstuvwxyz888", @fs.files[file].read)
   end
 
   def test_truncate
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new("abcdefghijklmnopqrstuvwxyz")}
+    @fs.preset({file => ["abcdefghijklmnopqrstuvwxyz"]})
     assert_equal(0, @fs.truncate(file, 10))
-    assert_equal("abcdefghij", @fs.files[file].contents)
+    assert_equal("abcdefghij", @fs.files[file].read)
     @fs.truncate file, 100
-    assert_equal("abcdefghij", @fs.files[file].contents)
+    assert_equal("abcdefghij", @fs.files[file].read)
     @fs.truncate file, 0
-    assert_equal("", @fs.files[file].contents)
+    assert_equal("", @fs.files[file].read)
 
-    @fs.files = {file => Calypso::FileAttr.new("abcdefghij")}
+    @fs.preset({file => ["abcdefghij"]})
     assert_equal(1, @fs.truncate(file, -1))
-    assert_equal("abcdefghij", @fs.files[file].contents)
+    assert_equal("abcdefghij", @fs.files[file].read)
   end
 
   def test_unlink
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new(""),
-                 :file2 => Calypso::FileAttr.new("")}
+    @fs.preset({file => [""],
+                :file2 => [""]})
     assert_nil(@fs.unlink "file3")
     assert_not_nil(@fs.unlink file)
     assert_nil(@fs.unlink file)
-    assert_equal([:file2], @fs.files.keys)
+    assert_equal([:file2], @fs.attrs.keys)
   end
 
   def test_utime
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new('', :mtime => 0)}
+    @fs.preset({file => ['', :mtime => 0]})
     t = Time.now.to_i
     @fs.utime(file, t)
-    assert_equal(t, @fs.files[file].mtime)
+    assert_equal(t, @fs.attrs[file].mtime)
   end
 
   def test_chown
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new('', :uid => 1, :gid => 1)}
+    @fs.preset({file => ['', :uid => 1, :gid => 1]})
     @fs.chown(file, 1000, -1)
-    assert_equal(1000, @fs.files[file].uid)
-    assert_equal(1, @fs.files[file].gid)
-    @fs.files = {file => Calypso::FileAttr.new('', :uid => 1, :gid => 1)}
+    assert_equal(1000, @fs.attrs[file].uid)
+    assert_equal(1, @fs.attrs[file].gid)
+    @fs.preset({file => ['', :uid => 1, :gid => 1]})
     @fs.chown(file, -1, 1000)
-    assert_equal(1, @fs.files[file].uid)
-    assert_equal(1000, @fs.files[file].gid)
+    assert_equal(1, @fs.attrs[file].uid)
+    assert_equal(1000, @fs.attrs[file].gid)
   end
 
   def test_chmod
     file = "/hello"
-    @fs.files = {file => Calypso::FileAttr.new('', :mode => 0600)}
+    @fs.preset({file => ['', :mode => 0600]})
     @fs.chmod(file, 0755)
-    assert_equal(0755, @fs.files[file].mode)
+    assert_equal(0755, @fs.attrs[file].mode)
   end
 end

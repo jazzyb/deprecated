@@ -1,15 +1,22 @@
 require 'calypso/file_attr'
+require 'calypso/file_store'
 require 'calypso/logger'
 
 module Calypso
   class FS
     def initialize
       @files = {}
+      @attrs = {}
     end
 
     def getattr (path)
+      Logger.debug { "Calypso::FS: getattr() called" }
+      @attrs[path]
+    end
+
+    def get_size (path)
       Logger.debug { "Calypso::FS: get_size() called" }
-      @files[path]
+      @files[path].size
     end
 
     def readdir (path)
@@ -17,31 +24,32 @@ module Calypso
       @files.keys.map { |filename| filename.sub('/', '') }
     end
 
-    def create (path)
+    def create (path, mode=0600)
       Logger.debug { "Calypso::FS: create() called" }
-      @files[path] = FileAttr.new("")
+      @files[path] = FileStore.new(path)
+      @attrs[path] = FileAttr.new(path, :mode => mode)
     end
 
     def open (path)
       Logger.debug { "Calypso::FS: open() called" }
-      @files.has_key?(path) ? true : nil
+      @attrs.has_key?(path) ? true : nil
     end
 
     def read (path, size, offset)
       Logger.debug { "Calypso::FS: read() called" }
-      @files[path].contents[offset...(offset+size)]
+      @files[path].read(size, offset)
     end
 
     def write (path, buf, size, offset)
       Logger.debug { "Calypso::FS: write() called" }
-      @files[path].contents.insert(offset, buf)
+      @files[path].write(buf, offset)
       size
     end
 
     def truncate (path, offset)
       Logger.debug { "Calypso::FS: truncate() called" }
       return 1 if offset < 0
-      @files[path].contents = @files[path].contents[0...offset]
+      @files[path].truncate(offset)
       0
     end
 
@@ -49,22 +57,23 @@ module Calypso
       Logger.debug { "Calypso::FS: unlink() called" }
       return nil unless @files.has_key?(path)
       @files.delete path
+      @attrs.delete path
     end
 
     def utime (path, mtime=Time.now.to_i)
       Logger.debug { "Calypso::FS: utime() called" }
-      @files[path].mtime = mtime
+      @attrs[path].mtime = mtime
     end
 
     def chown (path, uid, gid)
       Logger.debug { "Calypso::FS: chown() called" }
-      @files[path].uid = uid unless uid == -1
-      @files[path].gid = gid unless gid == -1
+      @attrs[path].uid = uid unless uid == -1
+      @attrs[path].gid = gid unless gid == -1
     end
 
     def chmod (path, mode)
-      Logger.debug { "Calypso::FS: chown() called" }
-      @files[path].mode = mode
+      Logger.debug { "Calypso::FS: chmod() called" }
+      @attrs[path].mode = mode
     end
 
     # Singleton implementation:
