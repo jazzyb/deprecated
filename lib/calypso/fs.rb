@@ -5,8 +5,10 @@ require 'calypso/logger'
 module Calypso
   class FS
     def initialize
-      @files = {}
+      # TODO remember to set the block_size and digest values
+      @files = FileStore.connect(:adapter => 'sqlite', :database => ':memory:')
       @attrs = {}
+      @files.keys.each { |filename| @attrs[filename] = FileAttr.new(filename) }
     end
 
     def getattr (path)
