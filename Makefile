@@ -1,8 +1,11 @@
+SHELL=/bin/bash
 CC=gcc
 FUSE_FLAGS=-D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26
-RUBY_INC=-I/usr/include/ruby-1.9.1/ -I/usr/include/ruby-1.9.1/i686-linux/
+RVM_PATH=$(HOME)/.rvm/rubies/ruby-1.9.3-p194-dev/
+RUBY_INC=-I$(RVM_PATH)/include/ruby-1.9.1 -I$(RVM_PATH)/include/ruby-1.9.1/i686-linux/
+RUBY_LIB=-L$(RVM_PATH)/lib/
 CFLAGS=-g -O0 $(FUSE_FLAGS) $(RUBY_INC)
-LIBS=-lfuse -lruby-1.9.1
+LIBS=$(RUBY_LIB) -lfuse -lruby
 
 all: calypso
 
