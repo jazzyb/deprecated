@@ -58,7 +58,7 @@ module Calypso
     def unlink (path)
       Logger.debug { "Calypso::FS: unlink() called" }
       return nil unless @files.has_key?(path)
-      @files.delete path
+      @files.delete(path).delete # delete the file_store and the mapping
       @attrs.delete path
     end
 

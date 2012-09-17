@@ -112,11 +112,11 @@ class TestFS < Test::Unit::TestCase
   def test_unlink
     file = "/hello"
     @fs.preset({file => [""],
-                :file2 => [""]})
+                "file2" => [""]})
     assert_nil(@fs.unlink "file3")
     assert_not_nil(@fs.unlink file)
     assert_nil(@fs.unlink file)
-    assert_equal([:file2], @fs.attrs.keys)
+    assert_equal(["file2"], @fs.attrs.keys)
   end
 
   def test_utime
