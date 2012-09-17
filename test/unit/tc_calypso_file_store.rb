@@ -33,6 +33,12 @@ class TestFileStore < Test::Unit::TestCase
     assert_equal([expected], db[:config].all)
   end
 
+  def test_db_read
+    db = 'sqlite://test/db/tc_calypso_file_store/test_db_read1.db'
+    assert_equal(['/bar', '/baz', '/foo'],
+                 Calypso::FileStore.connect(db).keys.sort)
+  end
+
   def test_initialize_empty_block
     Calypso::FileStore.connect(@dbconn)
     db = Sequel.connect(@dbconn)
@@ -164,5 +170,6 @@ class TestFileStore < Test::Unit::TestCase
     f = Calypso::FileStore.new("f", contents)
     f.delete
     assert_equal([], db[:blocks].where(:file_id => f.file_id).all)
+    assert_equal([], db[:files].where(:id => f.file_id).all)
   end
 end

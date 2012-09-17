@@ -20,46 +20,67 @@ module Calypso
       if @@db.tables.empty?
         create_database
       end
-      {} # return hash of { cleartext-filename => FileStore.new }
+      files = {}
+      @@db[:files].all.each do |row|
+        files[row[:encrypted_filename]] = FileStore.new(row[:id])
+      end
+      files
     end
 
-    def initialize (filename, contents="")
+    def initialize (identifier, contents="")
       raise "no calypso database" unless defined? @@db
-      @file_id = @@db[:files].insert( :encrypted_filename => filename )
-      insert_blocks contents.scan(/.{1,#@@block_size}/m)
+
+      # If the identifier for the file is an Integer, then we assume this file
+      # already exists in the database and that identifier must be the file id.
+      # Otherwise, we assume that it is a String and represents the name of a
+      # new file to create.
+      if identifier.kind_of? Integer
+        @file_id = identifier
+      else
+        @file_id = @@db[:files].insert( :encrypted_filename => identifier )
+        insert_blocks contents.scan(/.{1,#@@block_size}/m)
+      end
     end
 
     def size
+      return @size if @size
       row = get_file_blocks.
         order(:cleartext_offset).
         last
-      row[:cleartext_offset] + row[:cleartext_length]
+      @size = row[:cleartext_offset] + row[:cleartext_length]
     end
 
     def read (amount=size(), offset=0)
       return "" if amount == 0
+      amount = size() - offset if amount > size() - offset
 
-      set = get_file_blocks.
-        where { cleartext_offset >= (offset - @@block_size + 1) }.
+      first = get_file_blocks.
+        where { cleartext_offset <= offset }.
+        order(:cleartext_offset).
+        last
+
+      start = offset - first[:cleartext_offset]
+      if offset + amount <= first[:cleartext_offset] + first[:cleartext_length]
+        return first[:encrypted_contents][start...(start + amount)]
+      end
+
+      rest = get_file_blocks.
+        where { cleartext_offset > offset }.
         where { cleartext_offset < (offset + amount) }.
         order(:cleartext_offset).
         all
-      start = offset - set[0][:cleartext_offset]
-
-      if set.size == 1
-        return set[0][:encrypted_contents][start...(start + amount)]
-      end
-
-      ret = set[0][:encrypted_contents][start..-1]
+      ret = first[:encrypted_contents][start..-1]
       amount -= ret.size
-      set[1...-1].each do |row|
+      rest[0...-1].each do |row|
         ret += row[:encrypted_contents]
         amount -= row[:cleartext_length]
       end
-      ret + set[-1][:encrypted_contents][0...amount]
+      ret + rest[-1][:encrypted_contents][0...amount]
     end
 
     def write (buffer, offset)
+      @size = nil # all destructive methods must invalidate @size
+
       orig_buf_len = buffer.size
       row = get_file_blocks.
         where { cleartext_offset <= offset }.
@@ -72,9 +93,8 @@ module Calypso
       str = row[:encrypted_contents]
       str.insert(rel_off, buf)
       buffer += str.slice!(@@block_size..-1) if str.size >= @@block_size
-      @@db[:blocks].where(:id => row[:id]).
-        update( :encrypted_contents => str,
-                :cleartext_length => str.size )
+      update_block( row[:id], :encrypted_contents => str,
+                              :cleartext_length => str.size )
 
       # update all remaining blocks
       start_off = row[:cleartext_offset] + @@block_size
@@ -82,8 +102,8 @@ module Calypso
         where { cleartext_offset > offset }.
         all
       set.each do |row|
-        @@db[:blocks].where(:id => row[:id]).
-          update( :cleartext_offset => row[:cleartext_offset] + orig_buf_len )
+        new_off = row[:cleartext_offset] + orig_buf_len
+        update_block( row[:id], :cleartext_offset => new_off )
       end
 
       return if buffer.empty?
@@ -92,6 +112,8 @@ module Calypso
     end
 
     def truncate (offset)
+      @size = nil # all destructive methods must invalidate @size
+
       # delete all blocks higher than the offset
       get_file_blocks.
         where { cleartext_offset > offset }.
@@ -103,13 +125,13 @@ module Calypso
         last
       rel_off = offset - row[:cleartext_offset]
       str = row[:encrypted_contents][0...rel_off]
-      @@db[:blocks].where(:id => row[:id]).
-        update( :encrypted_contents => str,
-                :cleartext_length => str.size )
+      update_block( row[:id], :encrypted_contents => str,
+                              :cleartext_length => str.size )
     end
 
     def delete
       get_file_blocks.delete
+      @@db[:files].where(:id => @file_id).delete
     end
 
     private
@@ -187,6 +209,10 @@ module Calypso
 
     def get_file_blocks
       @@db[:blocks].where(:file_id => @file_id)
+    end
+
+    def update_block (id, args)
+      @@db[:blocks].where(:id => id).update(args)
     end
   end
 end
