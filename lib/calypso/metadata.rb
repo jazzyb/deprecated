@@ -1,5 +1,5 @@
 module Calypso
-  class FileAttr
+  class Metadata
     attr_accessor :mode, :uid, :gid, :mtime
     attr_reader :name
     def initialize (name, hash_args={})

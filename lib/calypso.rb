@@ -12,7 +12,7 @@ class ::Mutex
 end
 
 module Calypso
-  autoload :FileAttr,  'calypso/file_attr'
+  autoload :Metadata,  'calypso/metadata'
   autoload :FileStore, 'calypso/file_store'
   autoload :FS,        'calypso/fs'
   autoload :Logger,    'calypso/logger'

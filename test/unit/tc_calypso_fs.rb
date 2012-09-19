@@ -15,9 +15,9 @@ module Calypso
       hash.each do |name, arr|
         @files[name] = FileStore.new(name, arr[0])
         if arr.size == 2
-          @attrs[name] = FileAttr.new(name, arr[1])
+          @attrs[name] = Metadata.new(name, arr[1])
         else
-          @attrs[name] = FileAttr.new(name)
+          @attrs[name] = Metadata.new(name)
         end
       end
     end

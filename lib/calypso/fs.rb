@@ -1,6 +1,6 @@
-require 'calypso/file_attr'
 require 'calypso/file_store'
 require 'calypso/logger'
+require 'calypso/metadata'
 
 module Calypso
   class FS
@@ -8,7 +8,7 @@ module Calypso
       # TODO remember to set the block_size and digest values
       @files = FileStore.connect(:adapter => 'sqlite', :database => ':memory:')
       @attrs = {}
-      @files.keys.each { |filename| @attrs[filename] = FileAttr.new(filename) }
+      @files.keys.each { |filename| @attrs[filename] = Metadata.new(filename) }
     end
 
     def getattr (path)
@@ -29,7 +29,7 @@ module Calypso
     def create (path, mode=0600)
       Logger.debug { "Calypso::FS: create() called" }
       @files[path] = FileStore.new(path)
-      @attrs[path] = FileAttr.new(path, :mode => mode)
+      @attrs[path] = Metadata.new(path, :mode => mode)
     end
 
     def open (path)
