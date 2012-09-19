@@ -13,7 +13,7 @@ module Calypso
     def preset (hash)
       FS.reset
       hash.each do |name, arr|
-        @files[name] = FileStore.new(name, arr[0])
+        @files[name] = Calypso::File.new(name, arr[0])
         if arr.size == 2
           @attrs[name] = Metadata.new(name, arr[1])
         else

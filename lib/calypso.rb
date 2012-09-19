@@ -12,8 +12,8 @@ class ::Mutex
 end
 
 module Calypso
-  autoload :Metadata,  'calypso/metadata'
-  autoload :FileStore, 'calypso/file_store'
-  autoload :FS,        'calypso/fs'
-  autoload :Logger,    'calypso/logger'
+  autoload :Metadata, 'calypso/metadata'
+  autoload :File,     'calypso/file'
+  autoload :FS,       'calypso/fs'
+  autoload :Logger,   'calypso/logger'
 end

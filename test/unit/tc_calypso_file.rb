@@ -3,14 +3,14 @@ require 'sequel'
 require 'test/unit'
 
 module Calypso
-  class FileStore
+  class File
     attr_reader :file_id
   end
 end
 
 Calypso::Logger.level = Calypso::Logger::INFO # turn off logging
 
-class TestFileStore < Test::Unit::TestCase
+class TestFile < Test::Unit::TestCase
   def setup
     @dbname = '/tmp/test.db'
     @dbconn = 'sqlite://' + @dbname
@@ -19,31 +19,31 @@ class TestFileStore < Test::Unit::TestCase
 
   def teardown
     FileUtils.rm_f @dbname
-    Calypso::FileStore.block_size = Calypso::FileStore::DEFAULT_BLOCK_SIZE
+    Calypso::File.block_size = Calypso::File::DEFAULT_BLOCK_SIZE
   end
 
   def test_db_creation
-    Calypso::FileStore.digest_algo_type = 8080
-    assert_equal({}, Calypso::FileStore.connect(@dbconn))
+    Calypso::File.digest_algo_type = 8080
+    assert_equal({}, Calypso::File.connect(@dbconn))
     db = Sequel.connect(@dbconn)
     assert_equal([:blocks, :config, :files], db.tables.sort)
-    expected = { :schema_version => Calypso::FileStore::SCHEMA_VERSION,
-                 :block_size => Calypso::FileStore::DEFAULT_BLOCK_SIZE,
+    expected = { :schema_version => Calypso::File::SCHEMA_VERSION,
+                 :block_size => Calypso::File::DEFAULT_BLOCK_SIZE,
                  :digest_algo_type => 8080 }
     assert_equal([expected], db[:config].all)
   end
 
   def test_db_read
-    db = 'sqlite://test/db/tc_calypso_file_store/test_db_read1.db'
+    db = 'sqlite://test/db/tc_calypso_file/test_db_read1.db'
     assert_equal(['/bar', '/baz', '/foo'],
-                 Calypso::FileStore.connect(db).keys.sort)
+                 Calypso::File.connect(db).keys.sort)
   end
 
   def test_initialize_empty_block
-    Calypso::FileStore.connect(@dbconn)
+    Calypso::File.connect(@dbconn)
     db = Sequel.connect(@dbconn)
     name = "hello"
-    f = Calypso::FileStore.new(name)
+    f = Calypso::File.new(name)
     set = db[:files].where(:id => f.file_id).all
     assert_equal(1, set.size)
     row = set[0]
@@ -60,8 +60,8 @@ class TestFileStore < Test::Unit::TestCase
 
   def test_initialize_long_block
     blksz = 30
-    Calypso::FileStore.block_size = blksz
-    Calypso::FileStore.connect(@dbconn)
+    Calypso::File.block_size = blksz
+    Calypso::File.connect(@dbconn)
     db = Sequel.connect(@dbconn)
     name = "hello"
     contents = "abcdefghijklmnopqrstuvwxyz"
@@ -69,7 +69,7 @@ class TestFileStore < Test::Unit::TestCase
     contents += "0123456789"
     contents *= 20
 
-    f = Calypso::FileStore.new(name, contents)
+    f = Calypso::File.new(name, contents)
     set = db[:blocks].where(:file_id => f.file_id).all
     assert_equal(contents.size / blksz + 1, set.size)
 
@@ -80,7 +80,7 @@ class TestFileStore < Test::Unit::TestCase
       assert_equal(blocks[i], set[i][:encrypted_contents])
     end
 
-    g = Calypso::FileStore.new("hello2", ("a" * blksz) + "b")
+    g = Calypso::File.new("hello2", ("a" * blksz) + "b")
     assert_not_equal(f.file_id, g.file_id)
     set = db[:blocks].where(:file_id => g.file_id).order(:cleartext_offset).all
     assert_equal("a" * blksz, set[0][:encrypted_contents])
@@ -88,25 +88,25 @@ class TestFileStore < Test::Unit::TestCase
   end
 
   def test_size
-    Calypso::FileStore.connect(@memconn)
+    Calypso::File.connect(@memconn)
     contents = "abcdefghijklmnopqrstuvwxyz"
     contents += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     contents += "0123456789"
-    contents *= Calypso::FileStore::DEFAULT_BLOCK_SIZE
-    f = Calypso::FileStore.new("f", contents)
+    contents *= Calypso::File::DEFAULT_BLOCK_SIZE
+    f = Calypso::File.new("f", contents)
     assert_equal(contents.size, f.size)
-    g = Calypso::FileStore.new("g", "")
+    g = Calypso::File.new("g", "")
     assert_equal(0, g.size)
   end
 
   def test_read
-    Calypso::FileStore.block_size = 100
-    Calypso::FileStore.connect(@memconn)
+    Calypso::File.block_size = 100
+    Calypso::File.connect(@memconn)
     contents = "abcdefghijklmnopqrstuvwxyz"
     contents += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     contents += "0123456789"
-    contents *= Calypso::FileStore::DEFAULT_BLOCK_SIZE
-    f = Calypso::FileStore.new("f", contents)
+    contents *= Calypso::File::DEFAULT_BLOCK_SIZE
+    f = Calypso::File.new("f", contents)
     assert_equal(contents, f.read)
     assert_equal(contents[0...2000], f.read(2000))
     assert_equal(contents[1000...2000], f.read(1000, 1000))
@@ -116,14 +116,14 @@ class TestFileStore < Test::Unit::TestCase
 
   def test_write
     blksz = 100
-    Calypso::FileStore.block_size = blksz
-    Calypso::FileStore.connect(@dbconn)
+    Calypso::File.block_size = blksz
+    Calypso::File.connect(@dbconn)
     db = Sequel.connect(@dbconn)
     contents = "abcdefghijklmnopqrstuvwxyz"
     contents += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     contents += "0123456789"
-    contents *= Calypso::FileStore::DEFAULT_BLOCK_SIZE
-    f = Calypso::FileStore.new("f", contents)
+    contents *= Calypso::File::DEFAULT_BLOCK_SIZE
+    f = Calypso::File.new("f", contents)
     contents.insert(10, "888")
     f.write("888", 10)
     set = db[:blocks].where(:file_id => f.file_id).order(:cleartext_offset).all
@@ -147,13 +147,13 @@ class TestFileStore < Test::Unit::TestCase
 
   def test_truncate
     blksz = 100
-    Calypso::FileStore.block_size = blksz
-    Calypso::FileStore.connect(@memconn)
+    Calypso::File.block_size = blksz
+    Calypso::File.connect(@memconn)
     contents = "abcdefghijklmnopqrstuvwxyz"
     contents += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     contents += "0123456789"
-    contents *= Calypso::FileStore::DEFAULT_BLOCK_SIZE
-    f = Calypso::FileStore.new("f", contents)
+    contents *= Calypso::File::DEFAULT_BLOCK_SIZE
+    f = Calypso::File.new("f", contents)
     contents = contents[0...2000]
     f.truncate(2000)
     assert_equal(contents, f.read)
@@ -161,13 +161,13 @@ class TestFileStore < Test::Unit::TestCase
 
   def test_delete
     blksz = 10
-    Calypso::FileStore.block_size = blksz
-    Calypso::FileStore.connect(@dbconn)
+    Calypso::File.block_size = blksz
+    Calypso::File.connect(@dbconn)
     db = Sequel.connect(@dbconn)
     contents = "abcdefghijklmnopqrstuvwxyz"
     contents += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     contents += "0123456789"
-    f = Calypso::FileStore.new("f", contents)
+    f = Calypso::File.new("f", contents)
     f.delete
     assert_equal([], db[:blocks].where(:file_id => f.file_id).all)
     assert_equal([], db[:files].where(:id => f.file_id).all)

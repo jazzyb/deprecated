@@ -2,7 +2,7 @@ require 'rubygems'
 require 'sequel'
 
 module Calypso
-  class FileStore
+  class File
     SCHEMA_VERSION = 1
     DEFAULT_BLOCK_SIZE = 1024
     DEFAULT_DIGEST_ALGO_TYPE = 0
@@ -22,7 +22,7 @@ module Calypso
       end
       files = {}
       @@db[:files].all.each do |row|
-        files[row[:encrypted_filename]] = FileStore.new(row[:id])
+        files[row[:encrypted_filename]] = Calypso::File.new(row[:id])
       end
       files
     end
