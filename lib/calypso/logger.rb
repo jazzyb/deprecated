@@ -3,7 +3,7 @@ require 'syslog'
 module Calypso
   class Logger
     DEBUG = 0
-    INFO  = 1
+    OFF = 1
 
     @@level = DEBUG
 

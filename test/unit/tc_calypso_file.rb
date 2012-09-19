@@ -8,7 +8,7 @@ module Calypso
   end
 end
 
-Calypso::Logger.level = Calypso::Logger::INFO # turn off logging
+Calypso::Logger.level = Calypso::Logger::OFF
 
 class TestFile < Test::Unit::TestCase
   def setup
