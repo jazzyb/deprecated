@@ -1,0 +1,32 @@
+SUMMARY:
+
+Brucify is tool for taking a Film Critic Hulk post [1] and converting the text
+to a more pleasant visual experience.
+
+USAGE:
+
+Copy the ALL-CAPS text from any Film Critic Hulk post to a file (say:
+hulk.txt).  You may then run:
+
+  ./brucify.rb hulk.txt > bruce.txt
+
+to produce a less tempermental version of the original post.
+
+DETAILS:
+
+The script is embarassingly simplistic.  It replaces all the uppercase words
+with lowercase.  It then tries to recognize when a word is the first word of a
+sentence and capitalizes it appropriately.  All references to "HULK" are
+replaced with "Bruce".
+
+The reason I chose to keep the text in the third person is that figuring out
+when to convert "HULK" to "I" or "me" and then conjugating "has" to "have" or
+"is" to "am", etc. would have taken much too long for anything less than a
+master's thesis in NLP.  (But YOU, dear reader, are more than welcome to fork
+this repo, and I will welcome any improvments with open arms.)
+
+jazzyb
+
+-----------
+
+1. http://filmcrithulk.wordpress.com/
